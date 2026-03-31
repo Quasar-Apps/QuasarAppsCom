@@ -1,34 +1,177 @@
-.App-logo {
-    height: 40vmin;
+/* Additional App-specific styles */
+
+.App {
+    min-height: 100vh;
+}
+
+/* Hero gradient overlay */
+.hero-gradient {
+    background: linear-gradient(to bottom, 
+        rgba(5, 2, 17, 0.4) 0%,
+        rgba(5, 2, 17, 0.7) 50%,
+        rgba(5, 2, 17, 1) 100%
+    );
+}
+
+/* Service card hover state */
+.service-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.service-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+        rgba(209, 17, 162, 0.1) 0%, 
+        transparent 50%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.service-card:hover::after {
+    opacity: 1;
+}
+
+/* Case study card */
+.case-study-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.case-study-card img {
+    transition: transform 0.5s ease;
+}
+
+.case-study-card:hover img {
+    transform: scale(1.05);
+}
+
+/* Animated gradient border for featured items */
+@keyframes gradient-border {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+.animated-border {
+    background: linear-gradient(90deg, 
+        var(--primary-accent), 
+        var(--secondary-accent), 
+        var(--tertiary-accent),
+        var(--primary-accent)
+    );
+    background-size: 300% 100%;
+    animation: gradient-border 4s ease infinite;
+}
+
+/* Team member hover */
+.team-member {
+    position: relative;
+}
+
+.team-member-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, 
+        rgba(5, 2, 17, 0.9) 0%,
+        transparent 100%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.team-member:hover .team-member-overlay {
+    opacity: 1;
+}
+
+/* Marquee styling */
+.marquee-container {
+    mask-image: linear-gradient(to right, 
+        transparent 0%, 
+        black 10%, 
+        black 90%, 
+        transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(to right, 
+        transparent 0%, 
+        black 10%, 
+        black 90%, 
+        transparent 100%
+    );
+}
+
+/* Testimonial card */
+.testimonial-card {
+    position: relative;
+}
+
+.testimonial-card::before {
+    content: '"';
+    position: absolute;
+    top: -20px;
+    left: 20px;
+    font-size: 8rem;
+    font-family: 'Outfit', sans-serif;
+    color: rgba(209, 17, 162, 0.15);
+    line-height: 1;
     pointer-events: none;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+/* Nav link underline animation */
+.nav-link {
+    position: relative;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--primary-accent);
+    transition: width 0.3s ease;
 }
 
-.App-link {
-    color: #61dafb;
+.nav-link:hover::after {
+    width: 100%;
 }
 
-@keyframes App-logo-spin {
+/* Page transition */
+.page-transition {
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
     from {
-        transform: rotate(0deg);
+        opacity: 0;
+        transform: translateY(20px);
     }
     to {
-        transform: rotate(360deg);
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mobile menu animation */
+.mobile-menu-enter {
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
     }
 }
