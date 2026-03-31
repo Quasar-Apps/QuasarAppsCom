@@ -55,7 +55,7 @@ const Navigation = () => {
         transition={{ duration: 0.5 }}
         className={`fixed top-0 w-full z-50 transition-all duration-300 ${
           isScrolled 
-            ? "bg-[#050211]/80 backdrop-blur-xl border-b border-white/10" 
+            ? "glass-nav" 
             : "bg-transparent"
         }`}
         data-testid="navigation"

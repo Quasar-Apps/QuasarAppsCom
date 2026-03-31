@@ -67,11 +67,11 @@ const Team = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: idx * 0.1 }}
-              className="group team-member"
+              className="team-glass-card"
               data-testid={`team-member-${idx}`}
             >
-              <div className="glass-card overflow-hidden">
-                <div className="aspect-[3/4] relative overflow-hidden">
+              <div className="relative overflow-hidden">
+                <div className="aspect-[3/4] relative overflow-hidden group">
                   <img 
                     src={member.image} 
                     alt={member.name}

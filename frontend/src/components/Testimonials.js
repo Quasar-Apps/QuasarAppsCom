@@ -51,7 +51,7 @@ const Testimonials = () => {
         </motion.div>
 
         <div className="relative">
-          <div className="glass-card p-10 md:p-16 testimonial-card min-h-[300px] flex items-center">
+          <div className="glass-card p-10 md:p-16 testimonial-glass min-h-[300px] flex items-center">
             <AnimatePresence mode="wait">
               <motion.div
                 key={current}

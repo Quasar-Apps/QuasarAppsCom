@@ -78,8 +78,8 @@ const Services = () => {
               data-testid={`service-${idx}`}
             >
               <div 
-                className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6"
-                style={{ backgroundColor: `${service.color}20` }}
+                className="service-icon-glass w-14 h-14 flex items-center justify-center mb-6"
+                style={{ backgroundColor: `${service.color}15` }}
               >
                 <service.icon 
                   size={28} 

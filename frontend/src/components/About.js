@@ -62,7 +62,7 @@ const About = () => {
             {stats.map((stat, idx) => (
               <div 
                 key={stat.label}
-                className="glass-card p-8 text-center"
+                className="stat-glass p-8 text-center"
                 data-testid={`stat-${idx}`}
               >
                 <div className="text-4xl md:text-5xl font-light text-white mb-2">

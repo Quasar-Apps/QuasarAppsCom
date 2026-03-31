@@ -69,7 +69,7 @@ const CaseStudies = () => {
               >
                 <Link 
                   to={`/case-study/${study.slug}`}
-                  className="group block case-study-card glass-card overflow-hidden"
+                  className="group block case-study-card case-study-glass glass-shine-hover"
                   data-testid={`case-study-card-${study.slug}`}
                 >
                   <div className="aspect-[4/3] overflow-hidden">

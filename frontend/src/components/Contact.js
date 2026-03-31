@@ -107,7 +107,7 @@ const Contact = () => {
           >
             <form 
               onSubmit={handleSubmit}
-              className="glass-card p-8 md:p-10 relative z-10"
+              className="contact-glass p-8 md:p-10 relative z-10"
               data-testid="contact-form"
             >
               <div className="space-y-6">
