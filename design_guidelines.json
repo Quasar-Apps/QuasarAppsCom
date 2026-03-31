@@ -1,0 +1,124 @@
+{
+  "theme": "dark",
+  "archetype": "7 (Electric & Neon - Customized for Premium Cosmic Tech Agency)",
+  "emotional_tone": "Cutting-edge, Visionary, Premium, Cosmic yet Professional",
+  "typography": {
+    "heading_font": "Outfit",
+    "body_font": "IBM Plex Sans",
+    "scales": {
+      "h1": "text-5xl sm:text-6xl tracking-tighter font-light",
+      "h2": "text-4xl sm:text-5xl tracking-tight font-light",
+      "h3": "text-2xl sm:text-3xl tracking-tight font-medium",
+      "h4": "text-xl font-medium",
+      "body": "text-base leading-relaxed",
+      "overline": "text-xs tracking-[0.2em] uppercase font-bold"
+    },
+    "guidelines": "Do not use generic sans for headings. Apply tracking-tighter to all H1 and H2. Use Outfit for all headings to provide a futuristic, rounded, geometric feel. Body text (IBM Plex Sans) must be highly legible and sterile for contrast."
+  },
+  "colors": {
+    "background": "#050211",
+    "surface_glass": "rgba(255, 255, 255, 0.03)",
+    "surface_glass_hover": "rgba(255, 255, 255, 0.06)",
+    "primary_accent": "#D111A2",
+    "secondary_accent": "#9D4CDD",
+    "tertiary_accent": "#1B93A4",
+    "cta_background": "#FFFFFF",
+    "cta_text": "#050211",
+    "text_primary": "#FFFFFF",
+    "text_secondary": "#A09DB0",
+    "text_tertiary": "#68647D",
+    "border_subtle": "rgba(255, 255, 255, 0.08)",
+    "border_highlight": "rgba(209, 17, 162, 0.5)",
+    "guidelines": "Background must be deep cosmic void, not pure black. Use glassmorphism extensively but cleanly (Crystal glass variant). Avoid default gradients; use glowing accents, blurs behind borders, or 'tracing beam' effects to represent futuristic UX."
+  },
+  "layout_and_spacing": {
+    "philosophy": "Generous Spacing Philosophy - 2-3x typical spacing. Mobile-first responsive.",
+    "grid_system": "Bento Grid Protocol. Mode A (Tetris Grid) for Services and Portfolio sections. Create asymmetry. Span logic: mix col-span-4, col-span-8 to create visual tension. Never fill 100% perfectly, leave negative space.",
+    "corner_radius": "Extremely rounded to match futuristic UI constraints. Use rounded-3xl or rounded-full for cards and buttons. Avoid sharp edges.",
+    "section_spacing": "py-24 to py-32 for standard sections.",
+    "container_padding": "px-6 md:px-12 lg:px-24"
+  },
+  "components": {
+    "buttons": {
+      "primary": "rounded-full bg-white text-[#050211] font-medium px-8 py-4 hover:scale-105 transition-transform duration-300 shadow-[0_0_20px_rgba(255,255,255,0.3)]",
+      "secondary": "rounded-full bg-white/5 border border-white/10 text-white backdrop-blur-md px-8 py-4 hover:bg-white/10 hover:border-white/20 transition-all duration-300"
+    },
+    "cards": {
+      "glass": "bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-all hover:-translate-y-1 hover:border-white/20 hover:bg-white/10"
+    },
+    "navigation": {
+      "header": "fixed top-0 w-full z-50 bg-[#050211]/60 backdrop-blur-xl border-b border-white/10",
+      "links": "text-sm text-[#A09DB0] hover:text-white transition-colors"
+    },
+    "inputs": {
+      "text": "bg-[#050211]/50 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder-[#68647D] focus:outline-none focus:ring-2 focus:ring-[#D111A2] focus:border-transparent transition-all"
+    }
+  },
+  "visual_effects": {
+    "glow": "Use drop-shadows with primary/secondary colors to create cosmic neon glow (e.g. drop-shadow-[0_0_15px_rgba(209,17,162,0.5)]).",
+    "tracing_beam": "Apply moving gradient borders or subtle glowing edges to active or hovered glass cards.",
+    "glassmorphism": "Mandatory 1px delicate inner stroke on all glass surfaces. Heavy blur (backdrop-blur-xl or 2xl)."
+  },
+  "media": {
+    "logo": {
+      "url": "https://customer-assets.emergentagent.com/job_3cec2ff5-d333-4729-964f-f800e226e677/artifacts/3x01ffer_ChatGPT%20Image%20Mar%2031%2C%202026%2C%2005_44_24%20PM.png",
+      "alt": "Quasar Apps Logo - Glowing Cosmic Dog",
+      "usage": "Main navigation, footer, and potentially floating as a 3D element in the hero background."
+    },
+    "hero_backgrounds": [
+      {
+        "url": "https://images.pexels.com/photos/14573592/pexels-photo-14573592.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Abstract light painting with vibrant blue and purple swirls, heavily blurred as hero backdrop."
+      }
+    ],
+    "case_studies": [
+      {
+        "url": "https://images.unsplash.com/photo-1720135885007-454165745e21?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "title": "Fintech Dark Mode UI"
+      },
+      {
+        "url": "https://images.pexels.com/photos/12605419/pexels-photo-12605419.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "title": "EDM Music App"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1706700392642-dee59f678a09?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "title": "Enterprise Dashboard Matrix"
+      }
+    ],
+    "team": [
+      {
+        "url": "https://images.unsplash.com/photo-1758518731468-98e90ffd7430?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "name": "Design Team"
+      },
+      {
+        "url": "https://images.pexels.com/photos/23496703/pexels-photo-23496703.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "name": "Engineering Leads"
+      }
+    ],
+    "clients": [
+      {
+        "url": "https://images.unsplash.com/photo-1674978037981-fef8cbf2b3a2?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "name": "Nike"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1760037028485-d00dd2b8f6f0?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "name": "Apple Sports"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1769984867572-10dea95bd4f1?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "name": "Leut"
+      }
+    ]
+  },
+  "instructions_to_main_agent": [
+    "DO NOT USE INTER FONT FOR HEADINGS. Load 'Outfit' and 'IBM Plex Sans' from Google Fonts.",
+    "Implement the 'Crystal Glass' variant for all cards: bg-white/5, backdrop-blur-2xl, border-white/10.",
+    "For the hero section, overlay the hero_backgrounds[0] image with a deep radial gradient (e.g., bg-gradient-to-b from-[#050211]/40 via-[#050211]/80 to-[#050211]) so the text pops and the cosmic colors bleed through organically.",
+    "Implement a Custom Marquee for the Clients section using react-fast-marquee. Apply a mix-blend-mode or grayscale filter so they match the futuristic dark aesthetic.",
+    "Use Framer Motion for scroll reveals, staggered bento grid animations, and hover states.",
+    "Ensure all interactive elements have data-testid attributes (e.g., data-testid='contact-submit-button').",
+    "Do NOT use generic Shadcn cards without modifying them heavily to fit the glassmorphism aesthetic. Raw HTML/Tailwind is preferred for the layout.",
+    "Never center everything. Use optical alignment and left-aligned dense layouts for the bento grids.",
+    "Include a functional contact form that stores data, styled as a glowing futuristic glass panel."
+  ]
+}
