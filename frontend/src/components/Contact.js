@@ -107,7 +107,7 @@ const Contact = () => {
           >
             <form 
               onSubmit={handleSubmit}
-              className="glass-card p-8 md:p-10 tracing-border"
+              className="glass-card p-8 md:p-10 relative z-10"
               data-testid="contact-form"
             >
               <div className="space-y-6">
@@ -193,8 +193,13 @@ const Contact = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed relative z-20"
                   data-testid="contact-submit-button"
+                  onClick={(e) => {
+                    if (!loading) {
+                      e.currentTarget.form?.requestSubmit();
+                    }
+                  }}
                 >
                   {loading ? (
                     <div className="w-5 h-5 border-2 border-[#050211] border-t-transparent rounded-full animate-spin" />

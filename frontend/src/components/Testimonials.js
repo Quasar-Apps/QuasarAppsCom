@@ -94,8 +94,8 @@ const Testimonials = () => {
           <div className="flex justify-center gap-4 mt-8">
             <button
               onClick={prev}
-              className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors"
-              data-testid="testimonial-prev"
+              className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors relative z-10"
+              data-testid="testimonial-prev-btn"
               aria-label="Previous testimonial"
             >
               <ChevronLeft size={20} className="text-white" />
@@ -118,8 +118,8 @@ const Testimonials = () => {
             
             <button
               onClick={next}
-              className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors"
-              data-testid="testimonial-next"
+              className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors relative z-10"
+              data-testid="testimonial-next-btn"
               aria-label="Next testimonial"
             >
               <ChevronRight size={20} className="text-white" />
