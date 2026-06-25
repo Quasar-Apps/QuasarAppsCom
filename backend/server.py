@@ -4,11 +4,13 @@ from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import asyncio
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
+import resend
 
 
 ROOT_DIR = Path(__file__).parent
@@ -18,6 +20,10 @@ load_dotenv(ROOT_DIR / '.env')
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
+
+# Resend configuration
+resend.api_key = os.environ.get('RESEND_API_KEY')
+CONTACT_EMAIL = os.environ.get('CONTACT_EMAIL', 'admin@quasarapps.com')
 
 # Create the main app without a prefix
 app = FastAPI()
@@ -150,7 +156,40 @@ async def submit_contact(input: ContactMessageCreate):
     doc = contact_obj.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
     
+    # Save to database
     _ = await db.contact_messages.insert_one(doc)
+    
+    # Send email notification
+    try:
+        html_content = f"""
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #D111A2;">New Contact Form Submission</h2>
+            <hr style="border: 1px solid #eee;">
+            <p><strong>Name:</strong> {input.name}</p>
+            <p><strong>Email:</strong> {input.email}</p>
+            <p><strong>Company:</strong> {input.company or 'Not provided'}</p>
+            <h3 style="color: #333;">Message:</h3>
+            <p style="background: #f9f9f9; padding: 15px; border-radius: 8px;">{input.message}</p>
+            <hr style="border: 1px solid #eee;">
+            <p style="color: #666; font-size: 12px;">Sent from Quasar Apps contact form</p>
+        </div>
+        """
+        
+        params = {
+            "from": "Quasar Apps <onboarding@resend.dev>",
+            "to": [CONTACT_EMAIL],
+            "subject": f"New Contact: {input.name}" + (f" from {input.company}" if input.company else ""),
+            "html": html_content,
+            "reply_to": input.email
+        }
+        
+        # Run sync SDK in thread to keep FastAPI non-blocking
+        await asyncio.to_thread(resend.Emails.send, params)
+        logger.info(f"Contact email sent for {input.email}")
+    except Exception as e:
+        logger.error(f"Failed to send contact email: {str(e)}")
+        # Don't raise exception - still return success since message was saved
+    
     return contact_obj
 
 @api_router.get("/contact", response_model=List[ContactMessage])
