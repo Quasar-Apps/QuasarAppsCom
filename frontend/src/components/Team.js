@@ -38,7 +38,7 @@ const Team = () => {
             Meet the Founders
           </h2>
           <p className="text-[#A09DB0] max-w-xl mx-auto">
-            We're a team of two with complementary skills—technology and user experience—building 
+            We&apos;re a team of two with complementary skills—technology and user experience—building 
             products we believe in.
           </p>
         </motion.div>
@@ -61,7 +61,8 @@ const Team = () => {
                 <div className="aspect-[3/4] relative overflow-hidden">
                   <img 
                     src={member.image} 
-                    alt={member.name}
+                    alt={`${member.name}, ${member.role}`}
+                    loading="lazy"
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#050211]/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-6">

@@ -48,7 +48,7 @@ const CaseStudies = () => {
             </h2>
           </div>
           <p className="text-[#A09DB0] max-w-md mt-4 md:mt-0">
-            See what we're building—products designed with real users in mind.
+            See what we&apos;re building—products designed with real users in mind.
           </p>
         </motion.div>
 
@@ -73,7 +73,8 @@ const CaseStudies = () => {
                   <div className="aspect-[16/9] overflow-hidden">
                     <img 
                       src={study.thumbnail} 
-                      alt={study.title}
+                      alt={`${study.title} project thumbnail`}
+                      loading="lazy"
                       className="w-full h-full object-cover"
                     />
                   </div>
