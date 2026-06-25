@@ -45,38 +45,34 @@ const Team = () => {
 
         <div className="grid sm:grid-cols-2 max-w-2xl mx-auto gap-8">
           {team.map((member, idx) => (
-            <motion.div
+            <motion.a
               key={member.name}
+              href={member.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: idx * 0.1 }}
-              className="team-glass-card"
+              className="team-glass-card block cursor-pointer group"
               data-testid={`team-member-${idx}`}
             >
               <div className="relative overflow-hidden">
-                <div className="aspect-[3/4] relative overflow-hidden group">
+                <div className="aspect-[3/4] relative overflow-hidden">
                   <img 
                     src={member.image} 
                     alt={member.name}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
-                  <div className="team-member-overlay flex items-end justify-center pb-6">
-                    <div className="flex gap-4">
-                      <a 
-                        href={member.linkedin}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#D111A2] transition-colors"
-                        aria-label={`${member.name} LinkedIn`}
-                      >
-                        <Linkedin size={18} className="text-white" />
-                      </a>
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#050211]/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-6">
+                    <div className="flex items-center gap-2 text-white">
+                      <Linkedin size={18} />
+                      <span className="text-sm">View LinkedIn</span>
                     </div>
                   </div>
                 </div>
                 <div className="p-6 text-center">
-                  <h3 className="text-lg font-medium text-white mb-1">
+                  <h3 className="text-lg font-medium text-white mb-1 group-hover:text-[#D111A2] transition-colors">
                     {member.name}
                   </h3>
                   <p className="text-sm text-[#68647D]">
@@ -84,7 +80,7 @@ const Team = () => {
                   </p>
                 </div>
               </div>
-            </motion.div>
+            </motion.a>
           ))}
         </div>
       </div>

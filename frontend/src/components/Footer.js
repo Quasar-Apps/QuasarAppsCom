@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Github, Linkedin } from "lucide-react";
+import { Github } from "lucide-react";
 
 const LOGO_URL = "https://customer-assets.emergentagent.com/job_quantum-ui-3/artifacts/7pbry2i0_816de68f-f17b-4eac-a712-2b274cb965a5.png";
 
@@ -46,24 +46,6 @@ const Footer = () => {
                 aria-label="GitHub"
               >
                 <Github size={18} className="text-white" />
-              </a>
-              <a 
-                href="https://www.linkedin.com/in/martinosoriolopez/" 
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#D111A2] transition-colors"
-                aria-label="Martin's LinkedIn"
-              >
-                <Linkedin size={18} className="text-white" />
-              </a>
-              <a 
-                href="https://www.linkedin.com/in/uxbowen/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#D111A2] transition-colors"
-                aria-label="Christiana's LinkedIn"
-              >
-                <Linkedin size={18} className="text-white" />
               </a>
             </div>
           </div>
