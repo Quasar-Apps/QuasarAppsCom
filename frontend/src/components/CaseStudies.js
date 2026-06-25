@@ -103,16 +103,18 @@ const CaseStudies = () => {
                         <span>View Case Study</span>
                         <ArrowUpRight size={18} />
                       </Link>
-                      <a 
-                        href="https://mycsa.app"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="btn-primary inline-flex items-center gap-2"
-                        data-testid="visit-mycsa"
-                      >
-                        <span>Visit mycsa.app</span>
-                        <ExternalLink size={18} />
-                      </a>
+                      {study.slug === "mycsa-app" && (
+                        <a 
+                          href="https://mycsa.app"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn-primary inline-flex items-center gap-2"
+                          data-testid="visit-mycsa"
+                        >
+                          <span>Visit mycsa.app</span>
+                          <ExternalLink size={18} />
+                        </a>
+                      )}
                     </div>
                   </div>
                 </div>
