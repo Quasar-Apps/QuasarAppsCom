@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Github, Linkedin } from "lucide-react";
 
-const LOGO_URL = "https://customer-assets.emergentagent.com/job_3cec2ff5-d333-4729-964f-f800e226e677/artifacts/3x01ffer_ChatGPT%20Image%20Mar%2031%2C%202026%2C%2005_44_24%20PM.png";
+const LOGO_URL = "https://customer-assets.emergentagent.com/job_quantum-ui-3/artifacts/7pbry2i0_816de68f-f17b-4eac-a712-2b274cb965a5.png";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -125,18 +125,18 @@ const Footer = () => {
               </li>
               <li>
                 <a 
-                  href="mailto:hello@quasarapps.com"
+                  href="mailto:admin@quasarapps.com"
                   className="text-[#A09DB0] hover:text-white transition-colors"
                 >
-                  hello@quasarapps.com
+                  admin@quasarapps.com
                 </a>
               </li>
               <li>
                 <a 
-                  href="tel:+15551234567"
+                  href="tel:+16024562610"
                   className="text-[#A09DB0] hover:text-white transition-colors"
                 >
-                  +1 (555) 123-4567
+                  (602) 456-2610
                 </a>
               </li>
             </ul>
