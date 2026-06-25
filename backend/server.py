@@ -176,7 +176,7 @@ async def submit_contact(input: ContactMessageCreate):
         """
         
         params = {
-            "from": "Quasar Apps <onboarding@resend.dev>",
+            "from": "Quasar Apps <noreply@quasarapps.com>",
             "to": [CONTACT_EMAIL],
             "subject": f"New Contact: {input.name}" + (f" from {input.company}" if input.company else ""),
             "html": html_content,
