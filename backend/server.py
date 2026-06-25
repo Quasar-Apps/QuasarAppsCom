@@ -191,8 +191,11 @@ async def submit_contact(input: ContactMessageCreate):
         }
         
         # Run sync SDK in thread to keep FastAPI non-blocking
-        await asyncio.to_thread(resend.Emails.send, params)
-        logger.info(f"Contact email sent for {input.email}")
+        if resend.api_key:
+            await asyncio.to_thread(resend.Emails.send, params)
+            logger.info(f"Contact email sent for {input.email}")
+        else:
+            logger.warning("RESEND_API_KEY not set; skipping contact email notification")
     except Exception as e:
         logger.error(f"Failed to send contact email: {str(e)}")
         # Don't raise exception - still return success since message was saved
