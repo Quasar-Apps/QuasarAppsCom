@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 
-const BANNER_URL = "https://customer-assets.emergentagent.com/job_quantum-ui-3/artifacts/jslpzjbg_9ef2d321-9f2f-46bf-a1a9-d8977af6f646.png";
 const ICON_URL = "https://customer-assets.emergentagent.com/job_quantum-ui-3/artifacts/7pbry2i0_816de68f-f17b-4eac-a712-2b274cb965a5.png";
 
 const Hero = () => {
@@ -42,7 +41,7 @@ const Hero = () => {
         initial={{ opacity: 0, scale: 0.8, x: 100 }}
         animate={{ opacity: 1, scale: 1, x: 0 }}
         transition={{ duration: 1.2, ease: "easeOut" }}
-        className="absolute right-[-5%] md:right-[5%] top-1/2 -translate-y-1/2 w-[50%] md:w-[35%] pointer-events-none z-0"
+        className="absolute right-[-5%] md:right-[5%] top-[35%] -translate-y-1/2 w-[50%] md:w-[35%] pointer-events-none z-0"
       >
         <motion.img 
           src={ICON_URL} 
@@ -121,22 +120,6 @@ const Hero = () => {
           </a>
         </motion.div>
       </div>
-
-      {/* Bottom banner strip */}
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, delay: 1 }}
-        className="absolute bottom-24 left-0 right-0 overflow-hidden"
-      >
-        <div className="relative h-20 md:h-24 opacity-40 hover:opacity-60 transition-opacity duration-500">
-          <img 
-            src={BANNER_URL} 
-            alt="Quasar Apps" 
-            className="absolute left-1/2 -translate-x-1/2 h-full w-auto object-contain"
-          />
-        </div>
-      </motion.div>
 
       {/* Scroll Indicator */}
       <motion.button
