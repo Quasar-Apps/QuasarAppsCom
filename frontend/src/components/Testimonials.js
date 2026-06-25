@@ -7,13 +7,13 @@ const testimonials = [
     quote: "We're building myCSA.app to solve real problems we've experienced firsthand. Quasar Apps isn't just our company—it's our commitment to creating tools that actually work for the people who use them.",
     author: "Martin Osorio",
     role: "Co-Founder & Tech Lead, Quasar Apps",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?crop=entropy&cs=srgb&fm=jpg&q=85&w=100",
+    image: "https://customer-assets.emergentagent.com/job_quantum-ui-3/artifacts/v06tg0kj_20260408_150655.jpg",
   },
   {
     quote: "Great products start with understanding real users. At Quasar Apps, we lead with UX because we believe the best technology is invisible—it just works.",
     author: "Christiana Bowen",
     role: "Co-Founder & User Experience Lead, Quasar Apps",
-    image: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?crop=entropy&cs=srgb&fm=jpg&q=85&w=100",
+    image: "https://customer-assets.emergentagent.com/job_quantum-ui-3/artifacts/mrbyv6qp_1765492820351.jpg",
   },
 ];
 

@@ -1,20 +1,18 @@
 import { motion } from "framer-motion";
-import { Linkedin, Twitter } from "lucide-react";
+import { Linkedin } from "lucide-react";
 
 const team = [
   {
     name: "Martin Osorio",
     role: "Co-Founder & Tech Lead",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?crop=entropy&cs=srgb&fm=jpg&q=85&w=400",
-    linkedin: "#",
-    twitter: "#",
+    image: "https://customer-assets.emergentagent.com/job_quantum-ui-3/artifacts/v06tg0kj_20260408_150655.jpg",
+    linkedin: "https://www.linkedin.com/in/martinosoriolopez/",
   },
   {
     name: "Christiana Bowen",
     role: "Co-Founder & User Experience Lead",
-    image: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?crop=entropy&cs=srgb&fm=jpg&q=85&w=400",
-    linkedin: "#",
-    twitter: "#",
+    image: "https://customer-assets.emergentagent.com/job_quantum-ui-3/artifacts/mrbyv6qp_1765492820351.jpg",
+    linkedin: "https://www.linkedin.com/in/uxbowen/",
   },
 ];
 
@@ -67,17 +65,12 @@ const Team = () => {
                     <div className="flex gap-4">
                       <a 
                         href={member.linkedin}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#D111A2] transition-colors"
                         aria-label={`${member.name} LinkedIn`}
                       >
                         <Linkedin size={18} className="text-white" />
-                      </a>
-                      <a 
-                        href={member.twitter}
-                        className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#D111A2] transition-colors"
-                        aria-label={`${member.name} Twitter`}
-                      >
-                        <Twitter size={18} className="text-white" />
                       </a>
                     </div>
                   </div>

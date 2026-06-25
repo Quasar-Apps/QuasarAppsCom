@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Github, Linkedin, Twitter, Instagram } from "lucide-react";
+import { Github, Linkedin } from "lucide-react";
 
 const LOGO_URL = "https://customer-assets.emergentagent.com/job_3cec2ff5-d333-4729-964f-f800e226e677/artifacts/3x01ffer_ChatGPT%20Image%20Mar%2031%2C%202026%2C%2005_44_24%20PM.png";
 
@@ -35,36 +35,35 @@ const Footer = () => {
             </Link>
             <p className="text-[#A09DB0] leading-relaxed max-w-md mb-6">
               We craft digital experiences that transcend. A UX-led web and 
-              mobile development studio based in San Francisco.
+              mobile development studio building tools we believe in.
             </p>
             <div className="flex gap-4">
               <a 
-                href="#" 
-                className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#D111A2] transition-colors"
-                aria-label="Twitter"
-              >
-                <Twitter size={18} className="text-white" />
-              </a>
-              <a 
-                href="#" 
-                className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#D111A2] transition-colors"
-                aria-label="LinkedIn"
-              >
-                <Linkedin size={18} className="text-white" />
-              </a>
-              <a 
-                href="#" 
-                className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#D111A2] transition-colors"
-                aria-label="Instagram"
-              >
-                <Instagram size={18} className="text-white" />
-              </a>
-              <a 
-                href="#" 
+                href="https://github.com/QuasarApps" 
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#D111A2] transition-colors"
                 aria-label="GitHub"
               >
                 <Github size={18} className="text-white" />
+              </a>
+              <a 
+                href="https://www.linkedin.com/in/martinosoriolopez/" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#D111A2] transition-colors"
+                aria-label="Martin's LinkedIn"
+              >
+                <Linkedin size={18} className="text-white" />
+              </a>
+              <a 
+                href="https://www.linkedin.com/in/uxbowen/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#D111A2] transition-colors"
+                aria-label="Christiana's LinkedIn"
+              >
+                <Linkedin size={18} className="text-white" />
               </a>
             </div>
           </div>
