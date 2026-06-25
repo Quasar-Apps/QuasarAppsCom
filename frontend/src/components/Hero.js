@@ -1,8 +1,7 @@
 import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 
-const HERO_BG = "https://customer-assets.emergentagent.com/job_quantum-ui-3/artifacts/jslpzjbg_9ef2d321-9f2f-46bf-a1a9-d8977af6f646.png";
-const LOGO_URL = "https://customer-assets.emergentagent.com/job_quantum-ui-3/artifacts/7pbry2i0_816de68f-f17b-4eac-a712-2b274cb965a5.png";
+const BANNER_URL = "https://customer-assets.emergentagent.com/job_quantum-ui-3/artifacts/jslpzjbg_9ef2d321-9f2f-46bf-a1a9-d8977af6f646.png";
 
 const Hero = () => {
   const scrollToServices = () => {
@@ -11,79 +10,66 @@ const Hero = () => {
 
   return (
     <section 
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden pt-20"
       data-testid="hero-section"
     >
-      {/* Background */}
-      <div className="absolute inset-0">
+      {/* Cosmic Background Effects */}
+      <div className="absolute inset-0 cosmic-bg">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#D111A2]/20 rounded-full blur-[120px]" />
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-[#9D4CDD]/15 rounded-full blur-[100px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#1B93A4]/10 rounded-full blur-[150px]" />
+      </div>
+
+      {/* Banner Logo */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1, ease: "easeOut" }}
+        className="relative z-10 mb-8"
+      >
         <img 
-          src={HERO_BG} 
+          src={BANNER_URL} 
           alt="Quasar Apps" 
-          className="w-full h-full object-cover"
+          className="w-full max-w-2xl md:max-w-3xl h-auto object-contain"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#050211]/50 to-[#050211]" />
-      </div>
+      </motion.div>
 
-      {/* Content */}
-      <div className="relative z-10 px-6 md:px-12 lg:px-24 max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="mb-8"
-        >
-          <span className="text-xs tracking-[0.3em] uppercase text-[#D111A2]">
-            UX-Led Development Studio
-          </span>
-        </motion.div>
-
-        <motion.h1
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-light tracking-tighter text-white mb-8"
-          data-testid="hero-title"
-        >
-          We craft digital
+      {/* Tagline */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.5 }}
+        className="relative z-10 text-center px-6"
+      >
+        <p className="text-xl md:text-2xl text-[#A09DB0] max-w-2xl mx-auto mb-8 font-light">
+          UX-led web and mobile development studio.
           <br />
-          <span className="gradient-text">experiences</span> that
-          <br />
-          transcend
-        </motion.h1>
+          <span className="text-white">We transform complex ideas into elegant, intuitive products.</span>
+        </p>
+      </motion.div>
 
-        <motion.p
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
-          className="text-lg md:text-xl text-[#A09DB0] max-w-xl mb-12"
+      {/* CTAs */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.7 }}
+        className="relative z-10 flex flex-wrap gap-4 justify-center"
+      >
+        <a 
+          href="#contact" 
+          className="btn-primary"
+          data-testid="hero-cta-primary"
         >
-          Quasar Apps is a web and mobile development studio obsessed with 
-          user experience. We transform complex ideas into elegant, 
-          intuitive products.
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.8 }}
-          className="flex flex-wrap gap-4"
+          Start Your Project
+        </a>
+        <a 
+          href="#case-studies" 
+          className="btn-secondary"
+          data-testid="hero-cta-secondary"
         >
-          <a 
-            href="#contact" 
-            className="btn-primary"
-            data-testid="hero-cta-primary"
-          >
-            Start Your Project
-          </a>
-          <a 
-            href="#case-studies" 
-            className="btn-secondary"
-            data-testid="hero-cta-secondary"
-          >
-            View Our Work
-          </a>
-        </motion.div>
-      </div>
+          View Our Work
+        </a>
+      </motion.div>
 
       {/* Scroll Indicator */}
       <motion.button
