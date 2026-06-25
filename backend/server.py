@@ -161,15 +161,22 @@ async def submit_contact(input: ContactMessageCreate):
     
     # Send email notification
     try:
+        from html import escape
+
+        safe_name = escape(input.name)
+        safe_email = escape(str(input.email))
+        safe_company = escape(input.company) if input.company else "Not provided"
+        safe_message = escape(input.message).replace("\n", "<br/>")
+
         html_content = f"""
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #D111A2;">New Contact Form Submission</h2>
             <hr style="border: 1px solid #eee;">
-            <p><strong>Name:</strong> {input.name}</p>
-            <p><strong>Email:</strong> {input.email}</p>
-            <p><strong>Company:</strong> {input.company or 'Not provided'}</p>
+            <p><strong>Name:</strong> {safe_name}</p>
+            <p><strong>Email:</strong> {safe_email}</p>
+            <p><strong>Company:</strong> {safe_company}</p>
             <h3 style="color: #333;">Message:</h3>
-            <p style="background: #f9f9f9; padding: 15px; border-radius: 8px;">{input.message}</p>
+            <p style="background: #f9f9f9; padding: 15px; border-radius: 8px;">{safe_message}</p>
             <hr style="border: 1px solid #eee;">
             <p style="color: #666; font-size: 12px;">Sent from Quasar Apps contact form</p>
         </div>
