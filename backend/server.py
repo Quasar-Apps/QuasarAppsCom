@@ -4,11 +4,13 @@ from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import asyncio
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
+import resend
 
 
 ROOT_DIR = Path(__file__).parent
@@ -18,6 +20,10 @@ load_dotenv(ROOT_DIR / '.env')
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
+
+# Resend configuration
+resend.api_key = os.environ.get('RESEND_API_KEY')
+CONTACT_EMAIL = os.environ.get('CONTACT_EMAIL', 'admin@quasarapps.com')
 
 # Create the main app without a prefix
 app = FastAPI()
@@ -82,66 +88,24 @@ class CaseStudy(BaseModel):
 CASE_STUDIES = [
     {
         "id": "1",
-        "title": "Fintech Revolution",
-        "slug": "fintech-revolution",
-        "client": "NeoBank Pro",
-        "industry": "Financial Services",
-        "services": ["Mobile App Development", "UX Design", "Backend Architecture"],
-        "duration": "8 months",
-        "year": "2024",
-        "hero_image": "https://images.unsplash.com/photo-1720135885007-454165745e21?crop=entropy&cs=srgb&fm=jpg&q=85",
-        "thumbnail": "https://images.unsplash.com/photo-1720135885007-454165745e21?crop=entropy&cs=srgb&fm=jpg&q=85&w=600",
-        "short_description": "A groundbreaking mobile banking app that redefined user experience in financial services.",
-        "challenge": "NeoBank Pro needed to create a mobile-first banking experience that could compete with established players while offering innovative features that appeal to younger demographics. The existing solutions in the market were clunky and failed to provide intuitive navigation.",
-        "solution": "We designed and developed a comprehensive mobile banking platform with biometric authentication, real-time spending insights, AI-powered financial advice, and a seamless peer-to-peer payment system. The dark mode interface reduces eye strain and creates a premium feel.",
-        "results": ["500K+ downloads in first 3 months", "4.8★ rating on App Store", "40% reduction in customer support tickets", "60% increase in daily active users"],
-        "technologies": ["React Native", "Node.js", "PostgreSQL", "AWS", "TensorFlow"],
-        "testimonial": "Quasar Apps transformed our vision into reality. The attention to UX detail was exceptional.",
-        "testimonial_author": "Sarah Chen",
-        "testimonial_role": "CEO, NeoBank Pro",
-        "gallery": ["https://images.unsplash.com/photo-1720135885007-454165745e21?crop=entropy&cs=srgb&fm=jpg&q=85"]
-    },
-    {
-        "id": "2",
-        "title": "Sonic Pulse",
-        "slug": "sonic-pulse",
-        "client": "BeatStream Inc.",
-        "industry": "Entertainment",
-        "services": ["iOS Development", "Android Development", "Audio Engineering"],
-        "duration": "6 months",
-        "year": "2024",
-        "hero_image": "https://images.pexels.com/photos/12605419/pexels-photo-12605419.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
-        "thumbnail": "https://images.pexels.com/photos/12605419/pexels-photo-12605419.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
-        "short_description": "An immersive EDM music streaming app with live DJ sets and social features.",
-        "challenge": "BeatStream wanted to create a unique music streaming platform focused on electronic dance music that goes beyond just playing tracks, offering live events, artist interactions, and a vibrant community experience.",
-        "solution": "We built a cutting-edge streaming platform with real-time audio processing, live DJ broadcast capabilities, spatial audio support, and integrated social features. The visualizer adapts to the music beat, creating an immersive experience.",
-        "results": ["1M+ active users", "200+ partnered DJs", "Featured in Apple's Best Apps 2024", "3x user engagement vs competitors"],
-        "technologies": ["Swift", "Kotlin", "WebRTC", "Firebase", "Core Audio"],
-        "testimonial": "The audio quality and UX are unmatched. Quasar truly understood our vision for the future of music.",
-        "testimonial_author": "Marcus Webb",
-        "testimonial_role": "Founder, BeatStream Inc.",
-        "gallery": ["https://images.pexels.com/photos/12605419/pexels-photo-12605419.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"]
-    },
-    {
-        "id": "3",
-        "title": "Enterprise Command",
-        "slug": "enterprise-command",
-        "client": "TechCorp Global",
-        "industry": "Enterprise Software",
-        "services": ["Web Application", "Dashboard Design", "Data Visualization"],
-        "duration": "12 months",
-        "year": "2023",
-        "hero_image": "https://images.unsplash.com/photo-1706700392642-dee59f678a09?crop=entropy&cs=srgb&fm=jpg&q=85",
-        "thumbnail": "https://images.unsplash.com/photo-1706700392642-dee59f678a09?crop=entropy&cs=srgb&fm=jpg&q=85&w=600",
-        "short_description": "A powerful enterprise dashboard bringing data intelligence to decision makers.",
-        "challenge": "TechCorp needed a unified dashboard to aggregate data from multiple sources, provide real-time analytics, and enable executives to make data-driven decisions without technical expertise.",
-        "solution": "We developed a comprehensive enterprise command center with customizable widgets, real-time data streaming, predictive analytics, automated reporting, and role-based access control. The matrix-inspired design creates a futuristic command center feel.",
-        "results": ["85% faster decision-making", "50% reduction in reporting time", "Deployed across 12 countries", "ROI achieved in 6 months"],
-        "technologies": ["React", "Python", "Apache Kafka", "Elasticsearch", "Kubernetes"],
-        "testimonial": "This dashboard has transformed how we operate. It's like having a command center for our entire business.",
-        "testimonial_author": "James Morrison",
-        "testimonial_role": "CTO, TechCorp Global",
-        "gallery": ["https://images.unsplash.com/photo-1706700392642-dee59f678a09?crop=entropy&cs=srgb&fm=jpg&q=85"]
+        "title": "myCSA.app",
+        "slug": "mycsa-app",
+        "client": "myCSA",
+        "industry": "Agriculture & Farm Tech",
+        "services": ["Web Application", "UX Design", "Full-Stack Development"],
+        "duration": "Ongoing",
+        "year": "2024-Present",
+        "hero_image": "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "thumbnail": "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?crop=entropy&cs=srgb&fm=jpg&q=85&w=600",
+        "short_description": "A comprehensive farm management platform that brings orders, crops, harvest, packing, and delivery into one connected system.",
+        "challenge": "Small and medium-sized farms were running their operations across texts, spreadsheets, and memory. They needed a unified system to manage CSA (Community Supported Agriculture) subscriptions, track crops and lots, coordinate harvest and packing, and handle delivery routes—all while giving different team members the views they need.",
+        "solution": "We designed and built myCSA.app from the ground up with a UX-led approach. The platform features role-based dashboards for admins, growers, packers, sellers, and drivers. We created Sage, an operational intelligence layer that surfaces pressure, shortages, blockers, and next actions using real farm data. The system handles everything from order management and crop tracking to packing queues and delivery dispatch.",
+        "results": ["End-to-end farm operation visibility", "Role-based dashboards for entire team", "Sage AI surfaces issues before they hit orders", "No commission per order pricing model"],
+        "technologies": ["React", "Node.js", "PostgreSQL", "Real-time data processing", "AI/ML for operational intelligence"],
+        "testimonial": "Made by farmers, for farmers. Less farm admin, more real farm work.",
+        "testimonial_author": "myCSA Team",
+        "testimonial_role": "Farm Operations",
+        "gallery": ["https://images.unsplash.com/photo-1500937386664-56d1dfef3854?crop=entropy&cs=srgb&fm=jpg&q=85"]
     }
 ]
 
@@ -192,7 +156,50 @@ async def submit_contact(input: ContactMessageCreate):
     doc = contact_obj.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
     
+    # Save to database
     _ = await db.contact_messages.insert_one(doc)
+    
+    # Send email notification
+    try:
+        from html import escape
+
+        safe_name = escape(input.name)
+        safe_email = escape(str(input.email))
+        safe_company = escape(input.company) if input.company else "Not provided"
+        safe_message = escape(input.message).replace("\n", "<br/>")
+
+        html_content = f"""
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #D111A2;">New Contact Form Submission</h2>
+            <hr style="border: 1px solid #eee;">
+            <p><strong>Name:</strong> {safe_name}</p>
+            <p><strong>Email:</strong> {safe_email}</p>
+            <p><strong>Company:</strong> {safe_company}</p>
+            <h3 style="color: #333;">Message:</h3>
+            <p style="background: #f9f9f9; padding: 15px; border-radius: 8px;">{safe_message}</p>
+            <hr style="border: 1px solid #eee;">
+            <p style="color: #666; font-size: 12px;">Sent from Quasar Apps contact form</p>
+        </div>
+        """
+        
+        params = {
+            "from": "Quasar Apps <noreply@quasarapps.com>",
+            "to": [CONTACT_EMAIL],
+            "subject": f"New Contact: {input.name}" + (f" from {input.company}" if input.company else ""),
+            "html": html_content,
+            "reply_to": input.email
+        }
+        
+        # Run sync SDK in thread to keep FastAPI non-blocking
+        if resend.api_key:
+            await asyncio.to_thread(resend.Emails.send, params)
+            logger.info(f"Contact email sent for {input.email}")
+        else:
+            logger.warning("RESEND_API_KEY not set; skipping contact email notification")
+    except Exception as e:
+        logger.error(f"Failed to send contact email: {str(e)}")
+        # Don't raise exception - still return success since message was saved
+    
     return contact_obj
 
 @api_router.get("/contact", response_model=List[ContactMessage])

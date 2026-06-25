@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Clock, Calendar, Building2, Layers } from "lucide-react";
+import { ArrowLeft, ArrowRight, Clock, Calendar, Building2, Layers, ExternalLink } from "lucide-react";
 import axios from "axios";
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
@@ -106,9 +106,22 @@ const CaseStudyPage = () => {
               {caseStudy.title}
             </h1>
             
-            <p className="text-xl text-[#A09DB0] max-w-2xl">
+            <p className="text-xl text-[#A09DB0] max-w-2xl mb-8">
               {caseStudy.short_description}
             </p>
+            
+            {caseStudy.slug === 'mycsa-app' && (
+              <a 
+                href="https://mycsa.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-primary inline-flex items-center gap-2"
+                data-testid="visit-live-site"
+              >
+                <span>Visit Live Site</span>
+                <ExternalLink size={18} />
+              </a>
+            )}
           </motion.div>
         </div>
       </section>

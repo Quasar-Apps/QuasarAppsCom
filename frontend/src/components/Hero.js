@@ -1,8 +1,7 @@
 import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 
-const HERO_BG = "https://images.pexels.com/photos/14573592/pexels-photo-14573592.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940";
-const LOGO_URL = "https://customer-assets.emergentagent.com/job_3cec2ff5-d333-4729-964f-f800e226e677/artifacts/3x01ffer_ChatGPT%20Image%20Mar%2031%2C%202026%2C%2005_44_24%20PM.png";
+const ICON_URL = "https://customer-assets.emergentagent.com/job_quantum-ui-3/artifacts/7pbry2i0_816de68f-f17b-4eac-a712-2b274cb965a5.png";
 
 const Hero = () => {
   const scrollToServices = () => {
@@ -11,42 +10,65 @@ const Hero = () => {
 
   return (
     <section 
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      className="relative min-h-screen flex items-center overflow-hidden"
       data-testid="hero-section"
     >
-      {/* Background */}
+      {/* Animated Background Elements */}
       <div className="absolute inset-0">
-        <img 
-          src={HERO_BG} 
-          alt="" 
-          className="w-full h-full object-cover opacity-30 blur-sm"
+        {/* Gradient orbs */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 2 }}
+          className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-[#D111A2]/20 rounded-full blur-[150px]"
         />
-        <div className="absolute inset-0 hero-gradient" />
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 2, delay: 0.3 }}
+          className="absolute bottom-[-30%] left-[-20%] w-[600px] h-[600px] bg-[#9D4CDD]/15 rounded-full blur-[120px]"
+        />
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 2, delay: 0.6 }}
+          className="absolute top-[20%] left-[30%] w-[400px] h-[400px] bg-[#1B93A4]/10 rounded-full blur-[100px]"
+        />
       </div>
 
-      {/* Floating Logo */}
+      {/* Floating Icon - Large decorative element */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 0.1, scale: 1 }}
-        transition={{ duration: 1 }}
-        className="absolute right-[-10%] top-1/2 -translate-y-1/2 w-[60%] md:w-[40%] pointer-events-none"
+        initial={{ opacity: 0, scale: 0.8, x: 100 }}
+        animate={{ opacity: 1, scale: 1, x: 0 }}
+        transition={{ duration: 1.2, ease: "easeOut" }}
+        className="absolute right-[-5%] md:right-[5%] top-[35%] -translate-y-1/2 w-[50%] md:w-[35%] pointer-events-none z-0"
       >
-        <img 
-          src={LOGO_URL} 
+        <motion.img 
+          src={ICON_URL} 
           alt="" 
-          className="w-full h-auto opacity-50 blur-[2px]"
+          className="w-full h-auto opacity-60"
+          animate={{ 
+            y: [0, -20, 0],
+          }}
+          transition={{ 
+            duration: 6, 
+            repeat: Infinity, 
+            ease: "easeInOut" 
+          }}
         />
+        {/* Glow effect behind icon */}
+        <div className="absolute inset-0 bg-[#D111A2]/30 blur-[80px] -z-10" />
       </motion.div>
 
       {/* Content */}
-      <div className="relative z-10 px-6 md:px-12 lg:px-24 max-w-6xl mx-auto">
+      <div className="relative z-10 px-6 md:px-12 lg:px-24 max-w-5xl pt-20">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="mb-8"
+          className="mb-6"
         >
-          <span className="text-xs tracking-[0.3em] uppercase text-[#D111A2]">
+          <span className="inline-block px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs tracking-[0.3em] uppercase text-[#D111A2]">
             UX-Led Development Studio
           </span>
         </motion.div>
@@ -55,7 +77,7 @@ const Hero = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-light tracking-tighter text-white mb-8"
+          className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-light tracking-tighter text-white mb-8 leading-[1.1]"
           data-testid="hero-title"
         >
           We craft digital
@@ -69,7 +91,7 @@ const Hero = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.6 }}
-          className="text-lg md:text-xl text-[#A09DB0] max-w-xl mb-12"
+          className="text-lg md:text-xl text-[#A09DB0] max-w-xl mb-12 leading-relaxed"
         >
           Quasar Apps is a web and mobile development studio obsessed with 
           user experience. We transform complex ideas into elegant, 
@@ -103,9 +125,9 @@ const Hero = () => {
       <motion.button
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.2 }}
+        transition={{ delay: 1.5 }}
         onClick={scrollToServices}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 text-[#A09DB0] hover:text-white transition-colors cursor-pointer"
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 text-[#A09DB0] hover:text-white transition-colors cursor-pointer z-20"
         data-testid="scroll-indicator"
       >
         <motion.div

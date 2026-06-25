@@ -4,22 +4,16 @@ import { ChevronLeft, ChevronRight, Quote } from "lucide-react";
 
 const testimonials = [
   {
-    quote: "Quasar Apps transformed our vision into reality. Their attention to UX detail was exceptional, and they delivered a product that exceeded our expectations.",
-    author: "Sarah Chen",
-    role: "CEO, NeoBank Pro",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?crop=entropy&cs=srgb&fm=jpg&q=85&w=100",
+    quote: "We're building myCSA.app to solve real problems we've experienced firsthand. Quasar Apps isn't just our company—it's our commitment to creating tools that actually work for the people who use them.",
+    author: "Martin Osorio",
+    role: "Co-Founder & Tech Lead, Quasar Apps",
+    image: "https://customer-assets.emergentagent.com/job_quantum-ui-3/artifacts/v06tg0kj_20260408_150655.jpg",
   },
   {
-    quote: "The audio quality and UX are unmatched. Quasar truly understood our vision for the future of music streaming and brought it to life beautifully.",
-    author: "Marcus Webb",
-    role: "Founder, BeatStream Inc.",
-    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?crop=entropy&cs=srgb&fm=jpg&q=85&w=100",
-  },
-  {
-    quote: "This dashboard has transformed how we operate. It's like having a command center for our entire business. Truly a game-changer for our team.",
-    author: "James Morrison",
-    role: "CTO, TechCorp Global",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?crop=entropy&cs=srgb&fm=jpg&q=85&w=100",
+    quote: "Great products start with understanding real users. At Quasar Apps, we lead with UX because we believe the best technology is invisible—it just works.",
+    author: "Christiana Bowen",
+    role: "Co-Founder & User Experience Lead, Quasar Apps",
+    image: "https://customer-assets.emergentagent.com/job_quantum-ui-3/artifacts/mrbyv6qp_1765492820351.jpg",
   },
 ];
 
@@ -43,10 +37,10 @@ const Testimonials = () => {
           className="text-center mb-16"
         >
           <span className="text-xs tracking-[0.2em] uppercase text-[#9D4CDD] mb-4 block">
-            Testimonials
+            Our Philosophy
           </span>
           <h2 className="text-4xl sm:text-5xl font-light tracking-tight text-white">
-            What Our Clients Say
+            What Drives Us
           </h2>
         </motion.div>
 

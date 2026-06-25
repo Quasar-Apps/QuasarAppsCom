@@ -72,7 +72,7 @@ const Contact = () => {
                 </div>
                 <div>
                   <p className="text-sm text-[#68647D]">Email</p>
-                  <p className="text-white">hello@quasarapps.com</p>
+                  <p className="text-white">admin@quasarapps.com</p>
                 </div>
               </div>
 
@@ -82,7 +82,7 @@ const Contact = () => {
                 </div>
                 <div>
                   <p className="text-sm text-[#68647D]">Phone</p>
-                  <p className="text-white">+1 (555) 123-4567</p>
+                  <p className="text-white">(602) 456-2610</p>
                 </div>
               </div>
 

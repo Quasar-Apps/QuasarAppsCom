@@ -3,6 +3,7 @@ import Hero from "../components/Hero";
 import Services from "../components/Services";
 import CaseStudies from "../components/CaseStudies";
 import About from "../components/About";
+import GitHubCallout from "../components/GitHubCallout";
 import Team from "../components/Team";
 import Testimonials from "../components/Testimonials";
 import Contact from "../components/Contact";
@@ -16,6 +17,7 @@ const HomePage = () => {
       <Services />
       <CaseStudies />
       <About />
+      <GitHubCallout />
       <Team />
       <Testimonials />
       <Contact />
