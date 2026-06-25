@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 
-const HERO_BG = "https://images.pexels.com/photos/14573592/pexels-photo-14573592.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940";
+const HERO_BG = "https://customer-assets.emergentagent.com/job_quantum-ui-3/artifacts/jslpzjbg_9ef2d321-9f2f-46bf-a1a9-d8977af6f646.png";
 const LOGO_URL = "https://customer-assets.emergentagent.com/job_quantum-ui-3/artifacts/7pbry2i0_816de68f-f17b-4eac-a712-2b274cb965a5.png";
 
 const Hero = () => {
@@ -18,25 +18,11 @@ const Hero = () => {
       <div className="absolute inset-0">
         <img 
           src={HERO_BG} 
-          alt="" 
-          className="w-full h-full object-cover opacity-30 blur-sm"
+          alt="Quasar Apps" 
+          className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 hero-gradient" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#050211]/50 to-[#050211]" />
       </div>
-
-      {/* Floating Logo */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 0.1, scale: 1 }}
-        transition={{ duration: 1 }}
-        className="absolute right-[-10%] top-1/2 -translate-y-1/2 w-[60%] md:w-[40%] pointer-events-none"
-      >
-        <img 
-          src={LOGO_URL} 
-          alt="" 
-          className="w-full h-auto opacity-50 blur-[2px]"
-        />
-      </motion.div>
 
       {/* Content */}
       <div className="relative z-10 px-6 md:px-12 lg:px-24 max-w-6xl mx-auto">
