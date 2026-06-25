@@ -3,30 +3,16 @@ import { Linkedin, Twitter } from "lucide-react";
 
 const team = [
   {
-    name: "Alex Rivera",
-    role: "Founder & CEO",
+    name: "Martin Osorio",
+    role: "Co-Founder & Tech Lead",
     image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?crop=entropy&cs=srgb&fm=jpg&q=85&w=400",
     linkedin: "#",
     twitter: "#",
   },
   {
-    name: "Sarah Chen",
-    role: "Head of Design",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?crop=entropy&cs=srgb&fm=jpg&q=85&w=400",
-    linkedin: "#",
-    twitter: "#",
-  },
-  {
-    name: "Marcus Webb",
-    role: "Lead Engineer",
-    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?crop=entropy&cs=srgb&fm=jpg&q=85&w=400",
-    linkedin: "#",
-    twitter: "#",
-  },
-  {
-    name: "Elena Vasquez",
-    role: "UX Director",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?crop=entropy&cs=srgb&fm=jpg&q=85&w=400",
+    name: "Christiana Bowen",
+    role: "Co-Founder & User Experience Lead",
+    image: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?crop=entropy&cs=srgb&fm=jpg&q=85&w=400",
     linkedin: "#",
     twitter: "#",
   },
@@ -51,15 +37,15 @@ const Team = () => {
             Our Team
           </span>
           <h2 className="text-4xl sm:text-5xl font-light tracking-tight text-white mb-4">
-            Meet the Minds
+            Meet the Founders
           </h2>
           <p className="text-[#A09DB0] max-w-xl mx-auto">
-            A collective of designers, developers, and dreamers united by a 
-            passion for creating exceptional digital experiences.
+            We're a team of two with complementary skills—technology and user experience—building 
+            products we believe in.
           </p>
         </motion.div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid sm:grid-cols-2 max-w-2xl mx-auto gap-8">
           {team.map((member, idx) => (
             <motion.div
               key={member.name}

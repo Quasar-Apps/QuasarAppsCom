@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, ExternalLink } from "lucide-react";
 import axios from "axios";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -44,12 +44,11 @@ const CaseStudies = () => {
               Our Work
             </span>
             <h2 className="text-4xl sm:text-5xl font-light tracking-tight text-white">
-              Case Studies
+              Featured Project
             </h2>
           </div>
           <p className="text-[#A09DB0] max-w-md mt-4 md:mt-0">
-            Explore how we've helped companies transform their digital presence 
-            and achieve remarkable results.
+            See what we're building—products designed with real users in mind.
           </p>
         </motion.div>
 
@@ -58,7 +57,7 @@ const CaseStudies = () => {
             <div className="w-12 h-12 border-2 border-[#D111A2] border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="max-w-4xl mx-auto">
             {caseStudies.map((study, idx) => (
               <motion.div
                 key={study.id}
@@ -67,21 +66,20 @@ const CaseStudies = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: idx * 0.15 }}
               >
-                <Link 
-                  to={`/case-study/${study.slug}`}
-                  className="group block case-study-card case-study-glass glass-shine-hover"
+                <div 
+                  className="case-study-glass glass-shine-hover overflow-hidden"
                   data-testid={`case-study-card-${study.slug}`}
                 >
-                  <div className="aspect-[4/3] overflow-hidden">
+                  <div className="aspect-[16/9] overflow-hidden">
                     <img 
                       src={study.thumbnail} 
                       alt={study.title}
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <div className="p-6">
-                    <div className="flex items-center gap-2 mb-3">
-                      {study.services.slice(0, 2).map((service, sIdx) => (
+                  <div className="p-8">
+                    <div className="flex items-center gap-2 mb-4">
+                      {study.services.map((service, sIdx) => (
                         <span 
                           key={sIdx}
                           className="text-xs px-3 py-1 rounded-full bg-white/5 text-[#A09DB0]"
@@ -90,24 +88,34 @@ const CaseStudies = () => {
                         </span>
                       ))}
                     </div>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="text-xl font-medium text-white mb-2 group-hover:text-[#D111A2] transition-colors">
-                          {study.title}
-                        </h3>
-                        <p className="text-[#68647D] text-sm">
-                          {study.client}
-                        </p>
-                      </div>
-                      <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[#D111A2] transition-all">
-                        <ArrowUpRight 
-                          size={18} 
-                          className="text-[#A09DB0] group-hover:text-white transition-colors"
-                        />
-                      </div>
+                    <h3 className="text-3xl font-medium text-white mb-3">
+                      {study.title}
+                    </h3>
+                    <p className="text-[#A09DB0] text-lg mb-6 leading-relaxed">
+                      {study.short_description}
+                    </p>
+                    <div className="flex flex-wrap gap-4">
+                      <Link 
+                        to={`/case-study/${study.slug}`}
+                        className="btn-secondary inline-flex items-center gap-2"
+                        data-testid="view-case-study"
+                      >
+                        <span>View Case Study</span>
+                        <ArrowUpRight size={18} />
+                      </Link>
+                      <a 
+                        href="https://mycsa.app"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn-primary inline-flex items-center gap-2"
+                        data-testid="visit-mycsa"
+                      >
+                        <span>Visit mycsa.app</span>
+                        <ExternalLink size={18} />
+                      </a>
                     </div>
                   </div>
-                </Link>
+                </div>
               </motion.div>
             ))}
           </div>
