@@ -126,7 +126,7 @@ class TestContact:
             "name": "TEST_Bot",
             "email": "bot@example.com",
             "message": "spam",
-            "website": "http://spam.example",
+            "hp_field": "http://spam.example",
         }
         r = api_client.post(f"{API_URL}/contact", json=payload, timeout=10)
         assert r.status_code == 200

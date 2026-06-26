@@ -39,12 +39,32 @@ CONTACT_EMAIL = os.environ.get('CONTACT_EMAIL', 'admin@quasarapps.com')
 # Create the main app without a prefix
 app = FastAPI()
 
+
+def _client_ip(request: Request) -> str:
+    """Rate-limit key: the real client IP.
+
+    Behind a reverse proxy, ``request.client.host`` is the proxy's IP, which would make
+    the per-IP limit effectively global. Prefer the left-most ``X-Forwarded-For`` hop
+    when present. NOTE: X-Forwarded-For is only trustworthy when a known proxy
+    sets/sanitizes it (or uvicorn runs with ``--proxy-headers --forwarded-allow-ips``);
+    otherwise clients can spoof it — pair this with proxy-header trust in production.
+    """
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return get_remote_address(request)
+
+
 # Rate limiting (in-memory store; use a shared backend like Redis for multi-instance)
-limiter = Limiter(key_func=get_remote_address)
+limiter = Limiter(key_func=_client_ip)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# Reject oversized request bodies early — this API only accepts small JSON payloads.
+# Best-effort guard: reject obviously-oversized requests by their Content-Length header
+# before routing. NOT a hard limit — chunked requests omit Content-Length and the header
+# is client-supplied. The real bound on the contact payload is the pydantic field caps
+# (message <= 5000); enforce a true hard limit at the proxy/ASGI layer
+# (e.g. nginx client_max_body_size) — see ROADMAP SEC-5.
 MAX_BODY_BYTES = 64 * 1024
 
 
@@ -81,9 +101,10 @@ class ContactMessageCreate(BaseModel):
     email: EmailStr
     company: Optional[str] = Field(default=None, max_length=150)
     message: str = Field(min_length=1, max_length=5000)
-    # Honeypot: a hidden field real users never fill. Bot submissions that
-    # populate it are silently dropped. Capped so it can't be an abuse vector.
-    website: Optional[str] = Field(default=None, max_length=200)
+    # Honeypot: a hidden field real users never fill. Bot submissions that populate it
+    # are silently dropped. The obscure name avoids browser/password-manager autofill
+    # (a "website"/"email" name could drop a real lead). Capped to limit abuse.
+    hp_field: Optional[str] = Field(default=None, max_length=200)
 
 
 # Case Study Model
@@ -163,7 +184,7 @@ async def submit_contact(request: Request, input: ContactMessageCreate):
     contact_obj = ContactMessage(**input.model_dump())
 
     # Honeypot: silently accept and drop bot submissions (no store, no email).
-    if input.website:
+    if input.hp_field:
         logger.info("Dropped contact submission via honeypot")
         return contact_obj
 

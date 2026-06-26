@@ -13,7 +13,7 @@ const Contact = () => {
     email: "",
     company: "",
     message: "",
-    website: "", // honeypot — must stay empty for real users
+    hp_field: "", // honeypot — obscure name avoids autofill; must stay empty
   });
   const [loading, setLoading] = useState(false);
 
@@ -28,7 +28,7 @@ const Contact = () => {
     try {
       await axios.post(`${API}/contact`, formData);
       toast.success("Message sent successfully! We'll be in touch soon.");
-      setFormData({ name: "", email: "", company: "", message: "", website: "" });
+      setFormData({ name: "", email: "", company: "", message: "", hp_field: "" });
     } catch (error) {
       console.error("Error submitting form:", error);
       toast.error("Failed to send message. Please try again.");
@@ -112,11 +112,12 @@ const Contact = () => {
               data-testid="contact-form"
             >
               <div className="space-y-6">
-                {/* Honeypot: hidden from users; bots that fill it are silently dropped server-side */}
+                {/* Honeypot: hidden from users; bots that fill it are silently dropped
+                    server-side. Obscure name (not "website"/"email") avoids autofill false-positives. */}
                 <input
                   type="text"
-                  name="website"
-                  value={formData.website}
+                  name="hp_field"
+                  value={formData.hp_field}
                   onChange={handleChange}
                   tabIndex={-1}
                   autoComplete="off"
