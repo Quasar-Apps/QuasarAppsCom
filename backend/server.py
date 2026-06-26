@@ -39,24 +39,17 @@ CONTACT_EMAIL = os.environ.get('CONTACT_EMAIL', 'admin@quasarapps.com')
 # Create the main app without a prefix
 app = FastAPI()
 
-
-def _client_ip(request: Request) -> str:
-    """Rate-limit key: the real client IP.
-
-    Behind a reverse proxy, ``request.client.host`` is the proxy's IP, which would make
-    the per-IP limit effectively global. Prefer the left-most ``X-Forwarded-For`` hop
-    when present. NOTE: X-Forwarded-For is only trustworthy when a known proxy
-    sets/sanitizes it (or uvicorn runs with ``--proxy-headers --forwarded-allow-ips``);
-    otherwise clients can spoof it — pair this with proxy-header trust in production.
-    """
-    forwarded = request.headers.get("x-forwarded-for")
-    if forwarded:
-        return forwarded.split(",")[0].strip()
-    return get_remote_address(request)
-
-
-# Rate limiting (in-memory store; use a shared backend like Redis for multi-instance)
-limiter = Limiter(key_func=_client_ip)
+# Rate limiting (in-memory store; use a shared backend like Redis for multi-instance).
+# Keys on the client IP via ``request.client.host``.
+#
+# IMPORTANT (deploy): run uvicorn with ``--proxy-headers --forwarded-allow-ips=<proxy-ip>``
+# so it derives the real client IP from X-Forwarded-For ONLY when set by the trusted edge
+# proxy. We deliberately do NOT parse X-Forwarded-For in app code: the client-settable
+# left-most hop is spoofable, so trusting it would let an attacker rotate the header for a
+# fresh bucket per request and bypass the limit entirely (fail-open). Without proxy-header
+# trust the key is coarser (the proxy IP — limit is global) but still fails CLOSED.
+# Wiring the proxy flags is tracked for Phase 5 (deploy/run setup).
+limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
