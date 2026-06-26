@@ -1,6 +1,7 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, Request
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
+from starlette.responses import JSONResponse
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
@@ -11,6 +12,9 @@ from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
 import resend
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 
 
 ROOT_DIR = Path(__file__).parent
@@ -35,25 +39,48 @@ CONTACT_EMAIL = os.environ.get('CONTACT_EMAIL', 'admin@quasarapps.com')
 # Create the main app without a prefix
 app = FastAPI()
 
+# Rate limiting (in-memory store; use a shared backend like Redis for multi-instance).
+# Keys on the client IP via ``request.client.host``.
+#
+# IMPORTANT (deploy): run uvicorn with ``--proxy-headers --forwarded-allow-ips=<proxy-ip>``
+# so it derives the real client IP from X-Forwarded-For ONLY when set by the trusted edge
+# proxy. We deliberately do NOT parse X-Forwarded-For in app code: the client-settable
+# left-most hop is spoofable, so trusting it would let an attacker rotate the header for a
+# fresh bucket per request and bypass the limit entirely (fail-open). Without proxy-header
+# trust the key is coarser (the proxy IP — limit is global) but still fails CLOSED.
+# Wiring the proxy flags is tracked for Phase 5 (deploy/run setup).
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# Best-effort guard: reject obviously-oversized requests by their Content-Length header
+# before routing. NOT a hard limit — chunked requests omit Content-Length and the header
+# is client-supplied. The real bound on the contact payload is the pydantic field caps
+# (message <= 5000); enforce a true hard limit at the proxy/ASGI layer
+# (e.g. nginx client_max_body_size) — see ROADMAP SEC-5.
+MAX_BODY_BYTES = 64 * 1024
+
+
+@app.middleware("http")
+async def limit_body_size(request: Request, call_next):
+    content_length = request.headers.get("content-length")
+    if content_length is not None:
+        try:
+            if int(content_length) > MAX_BODY_BYTES:
+                return JSONResponse(status_code=413, content={"detail": "Request body too large"})
+        except ValueError:
+            pass
+    return await call_next(request)
+
+
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
 
-# Define Models
-class StatusCheck(BaseModel):
-    model_config = ConfigDict(extra="ignore")
-    
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    client_name: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-class StatusCheckCreate(BaseModel):
-    client_name: str
-
 # Contact Form Model
 class ContactMessage(BaseModel):
     model_config = ConfigDict(extra="ignore")
-    
+
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
     email: EmailStr
@@ -61,16 +88,22 @@ class ContactMessage(BaseModel):
     message: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+
 class ContactMessageCreate(BaseModel):
-    name: str
+    name: str = Field(min_length=1, max_length=100)
     email: EmailStr
-    company: Optional[str] = None
-    message: str
+    company: Optional[str] = Field(default=None, max_length=150)
+    message: str = Field(min_length=1, max_length=5000)
+    # Honeypot: a hidden field real users never fill. Bot submissions that populate it
+    # are silently dropped. The obscure name avoids browser/password-manager autofill
+    # (a "website"/"email" name could drop a real lead). Capped to limit abuse.
+    hp_field: Optional[str] = Field(default=None, max_length=200)
+
 
 # Case Study Model
 class CaseStudy(BaseModel):
     model_config = ConfigDict(extra="ignore")
-    
+
     id: str
     title: str
     slug: str
@@ -90,6 +123,7 @@ class CaseStudy(BaseModel):
     testimonial_author: Optional[str] = None
     testimonial_role: Optional[str] = None
     gallery: List[str] = []
+
 
 # Seed case studies data
 CASE_STUDIES = [
@@ -121,31 +155,12 @@ CASE_STUDIES = [
 async def root():
     return {"message": "Quasar Apps API"}
 
-@api_router.post("/status", response_model=StatusCheck)
-async def create_status_check(input: StatusCheckCreate):
-    status_dict = input.model_dump()
-    status_obj = StatusCheck(**status_dict)
-    
-    doc = status_obj.model_dump()
-    doc['timestamp'] = doc['timestamp'].isoformat()
-    
-    _ = await db.status_checks.insert_one(doc)
-    return status_obj
-
-@api_router.get("/status", response_model=List[StatusCheck])
-async def get_status_checks():
-    status_checks = await db.status_checks.find({}, {"_id": 0}).sort("timestamp", -1).to_list(1000)
-    
-    for check in status_checks:
-        if isinstance(check['timestamp'], str):
-            check['timestamp'] = datetime.fromisoformat(check['timestamp'])
-    
-    return status_checks
 
 # Case Studies Routes
 @api_router.get("/case-studies", response_model=List[CaseStudy])
 async def get_case_studies():
     return CASE_STUDIES
+
 
 @api_router.get("/case-studies/{slug}", response_model=CaseStudy)
 async def get_case_study(slug: str):
@@ -154,18 +169,24 @@ async def get_case_study(slug: str):
             return study
     raise HTTPException(status_code=404, detail="Case study not found")
 
+
 # Contact Routes
 @api_router.post("/contact", response_model=ContactMessage)
-async def submit_contact(input: ContactMessageCreate):
-    contact_dict = input.model_dump()
-    contact_obj = ContactMessage(**contact_dict)
-    
+@limiter.limit("5/minute")
+async def submit_contact(request: Request, input: ContactMessageCreate):
+    contact_obj = ContactMessage(**input.model_dump())
+
+    # Honeypot: silently accept and drop bot submissions (no store, no email).
+    if input.hp_field:
+        logger.info("Dropped contact submission via honeypot")
+        return contact_obj
+
     doc = contact_obj.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
-    
+
     # Save to database
     _ = await db.contact_messages.insert_one(doc)
-    
+
     # Send email notification
     try:
         from html import escape
@@ -188,7 +209,7 @@ async def submit_contact(input: ContactMessageCreate):
             <p style="color: #666; font-size: 12px;">Sent from Quasar Apps contact form</p>
         </div>
         """
-        
+
         params = {
             "from": "Quasar Apps <noreply@quasarapps.com>",
             "to": [CONTACT_EMAIL],
@@ -196,7 +217,7 @@ async def submit_contact(input: ContactMessageCreate):
             "html": html_content,
             "reply_to": input.email
         }
-        
+
         # Run sync SDK in thread to keep FastAPI non-blocking
         if resend.api_key:
             await asyncio.to_thread(resend.Emails.send, params)
@@ -206,29 +227,24 @@ async def submit_contact(input: ContactMessageCreate):
     except Exception as e:
         logger.error(f"Failed to send contact email: {str(e)}")
         # Don't raise exception - still return success since message was saved
-    
+
     return contact_obj
 
-@api_router.get("/contact", response_model=List[ContactMessage])
-async def get_contact_messages():
-    messages = await db.contact_messages.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
-    
-    for msg in messages:
-        if isinstance(msg['created_at'], str):
-            msg['created_at'] = datetime.fromisoformat(msg['created_at'])
-    
-    return messages
 
 # Include the router in the main app
 app.include_router(api_router)
 
+# CORS — credentials disabled so a wildcard origin is safe; methods/headers pinned.
+# Set CORS_ORIGINS to the production frontend origin(s) to lock origins down further.
+_cors_origins = [o.strip() for o in os.environ.get('CORS_ORIGINS', '*').split(',') if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_credentials=False,
+    allow_origins=_cors_origins,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type"],
 )
+
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
