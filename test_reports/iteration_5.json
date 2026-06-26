@@ -33,8 +33,8 @@
     "Frontend: Contact form submits successfully and shows toast 'Message sent successfully! We'll be in touch soon.'"
   ],
   "test_report_links": [
-    "/app/backend/tests/test_quasar_api.py",
-    "/app/test_reports/pytest/pytest_results.xml"
+    "backend/tests/test_quasar_api.py",
+    "test_reports/pytest/pytest_results.xml"
   ],
   "action_items": [
     "(Optional / LOW) Add loading='lazy' to remaining 3 logo/icon images for full compliance with lazy loading requirement, though current behavior is acceptable for above-the-fold logos."
@@ -47,13 +47,13 @@
     "Contact email failure is logged and swallowed so the API still returns success once persisted - good UX, but consider returning a flag indicating email delivery status in the response payload."
   ],
   "updated_files": [
-    "/app/backend/tests/test_quasar_api.py (new pytest suite created)"
+    "backend/tests/test_quasar_api.py (new pytest suite created)"
   ],
   "success_rate": {"backend": "100% (10/10)", "frontend": "100% on all reviewed flows"},
   "test_credentials": "N/A - no auth in this app",
   "seed_data_creation": "Contact form messages prefixed with 'TEST_' were created during test runs (visible via GET /api/contact).",
   "retest_needed": false,
   "should_main_agent_self_test": true,
-  "context_for_next_testing_agent": "Backend pytest suite at /app/backend/tests/test_quasar_api.py covers all endpoints. Frontend data-testids: services use 'service-{idx}', stats use 'stat-{idx}', contact uses 'contact-name-input', 'contact-email-input', 'contact-company-input', 'contact-message-input', 'contact-submit-button' (note: not -btn). Testimonials use 'testimonial-prev-btn', 'testimonial-next-btn', 'testimonial-quote'. Previous iteration_4 testimonial bug is fixed.",
+  "context_for_next_testing_agent": "Backend pytest suite at backend/tests/test_quasar_api.py covers all endpoints. Frontend data-testids: services use 'service-{idx}', stats use 'stat-{idx}', contact uses 'contact-name-input', 'contact-email-input', 'contact-company-input', 'contact-message-input', 'contact-submit-button' (note: not -btn). Testimonials use 'testimonial-prev-btn', 'testimonial-next-btn', 'testimonial-quote'. Previous iteration_4 testimonial bug is fixed.",
   "rca_of_the_issue": "N/A - no bugs found in this iteration. Iteration 4 testimonial nav bug is now resolved by current AnimatePresence + key={current} implementation in Testimonials.js (verified: q1=Martin -> next -> q2=Christiana -> prev -> q1=Martin)."
 }
