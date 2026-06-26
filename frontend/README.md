@@ -1,70 +1,43 @@
-# Getting Started with Create React App
+# Quasar Apps — Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+React single-page app for the Quasar Apps marketing site. Built with **Create React App
+via [CRACO](https://craco.js.org/)** (not plain `react-scripts`), Tailwind CSS, Framer
+Motion, and React Router.
 
-## Available Scripts
+See the [root README](../README.md) for full-stack setup; this file covers the frontend only.
 
-In the project directory, you can run:
+## Setup
 
-### `npm start`
+```bash
+yarn install
+cp .env.example .env   # set REACT_APP_BACKEND_URL
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+`REACT_APP_BACKEND_URL` is the base URL of the backend (no trailing slash); the app calls
+`${REACT_APP_BACKEND_URL}/api/...`.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Scripts
 
-### `npm test`
+> Uses **Yarn** + **CRACO**. Use these, not `npm`/`react-scripts` directly.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+| Command | What it does |
+|---------|--------------|
+| `yarn start` | Run the dev server (`craco start`) at http://localhost:3000 |
+| `yarn build` | Production build to `build/` (`craco build`) |
+| `yarn test`  | Run tests in watch mode (`craco test`) |
 
-### `npm run build`
+## Structure
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```
+src/
+  App.js            Router + Toaster
+  pages/            HomePage, CaseStudyPage
+  components/       Section components (Hero, Services, Contact, ...)
+  components/ui/    shadcn/ui primitives (currently unused — see ROADMAP FE-1)
+  index.css         Design tokens + "Liquid Glass" styles
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Plugins
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+`plugins/health-check/` adds `/health/live` and `/health/ready` endpoints, toggled via
+`ENABLE_HEALTH_CHECK`.

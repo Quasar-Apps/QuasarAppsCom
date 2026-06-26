@@ -1,0 +1,56 @@
+name: CI
+
+# Quality gate for the develop -> main flow. Keep this green before merging.
+#
+# Scope is intentionally a foundation (DX-1): it catches real build/compile breakage
+# and that the test suite still collects. Stricter checks land in later roadmap phases:
+#   - DX-7: flake8/black/mypy config + backend lint
+#   - DX-8: eslint flat config + Prettier (then flip the frontend build to CI=true)
+#   - TEST-1: hermetic in-process backend tests (so pytest actually exercises the API here)
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: Frontend build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+          cache-dependency-path: frontend/yarn.lock
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      - name: Build
+        # CI=false so pre-existing eslint *warnings* don't fail the build yet.
+        # Real compile/type errors still fail. Flip to CI=true once DX-8 lands.
+        env:
+          CI: false
+        run: yarn build
+
+  backend:
+    name: Backend checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Syntax check
+        run: python -m py_compile backend/server.py backend/tests/test_quasar_api.py
+      - name: Install test tooling
+        run: pip install pytest requests
+      - name: Pytest (integration suite skips unless REACT_APP_BACKEND_URL is set)
+        run: pytest backend/tests -q
