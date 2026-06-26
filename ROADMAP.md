@@ -18,7 +18,7 @@ incrementally.
 
 ## How to read this
 
-- **Severity** — `P0` critical (security/data) · `P1` high (production-readiness) ·
+- **Severity** — `P0` critical / must-ship-first · `P1` high (production-readiness) ·
   `P2` medium (quality/correctness) · `P3` low (polish/hygiene).
 - **Effort** — rough engineering size: `S` ≤ half day · `M` ~1–2 days · `L` ~3–5 days.
 - **ID** — stable handle (e.g. `SEC-1`) used in the checklist and suggested PR slicing.
@@ -29,11 +29,11 @@ incrementally.
 
 | Phase | Theme | Goal | Severity focus | Est. |
 |------:|-------|------|----------------|-----:|
-| **0** | Critical Security | Close the data-leak and abuse vectors | P0–P1 | ~1 day |
+| **0** | Critical Security | Close the data-leak and abuse vectors | P0–P2 | ~1 day |
 | **1** | Production Hardening & De-Emergent | Make it a real, discoverable company site | P0–P1 | ~3 days |
-| **2** | Accessibility | Meet WCAG AA baseline | P0–P2 | ~2 days |
+| **2** | Accessibility | Meet WCAG AA baseline | P0–P3 | ~2 days |
 | **3** | Architecture & Dependency Cleanup | Remove scaffold cruft, add safety nets | P1–P3 | ~3 days |
-| **4** | Performance & Media | Fix LCP/CLS, trim payloads | P2–P3 | ~1–2 days |
+| **4** | Performance & Media | Fix LCP/CLS, trim payloads | P1–P3 | ~1–2 days |
 | **5** | Testing & Quality Gates | Make quality enforceable & repeatable | P1–P2 | ~2 days |
 | **6** | Content & Hygiene Polish | Truthful copy, clean repo | P2–P3 | ~1 day |
 
@@ -73,15 +73,20 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
 
 ### SEC-3 · Fix the CORS credentials + wildcard combination `P1` `S`
 - **Files:** `backend/server.py` (`add_middleware(CORSMiddleware, …)`, ~L225–231)
-- **Problem:** `allow_credentials=True` with `allow_origins=['*']` makes Starlette
-  **reflect any Origin** and return `Access-Control-Allow-Credentials: true` —
-  it green-lights credentialed cross-origin calls from any website.
+- **Problem:** `allow_credentials=True` with `allow_origins=['*']` (the committed
+  default) makes Starlette **reflect any Origin** and return
+  `Access-Control-Allow-Credentials: true` — it green-lights credentialed
+  cross-origin calls from any website. `allow_methods=['*']` and `allow_headers=['*']`
+  widen the surface further. On a **default deploy this compounds `SEC-1` into a P0
+  data-exposure chain** (any site can read the open PII endpoint from a victim's
+  browser), so treat it as P0-adjacent, not an isolated P1.
 - **Steps:**
   1. Set `allow_credentials=False` (nothing here uses cookies), **or** pin
      `allow_origins` to the explicit production frontend origin(s).
-  2. `.strip()` each entry parsed from `CORS_ORIGINS`.
-  3. Never combine `*` with credentials.
-- **Done when:** CORS either disallows credentials or pins real origins.
+  2. Pin `allow_methods` / `allow_headers` to what the API actually uses instead of `*`.
+  3. `.strip()` each entry parsed from `CORS_ORIGINS`.
+  4. Never combine `*` with credentials.
+- **Done when:** CORS disallows credentials or pins real origins, methods, and headers.
 
 ### SEC-4 · Rate-limit and de-abuse the contact POST `P1` `M`
 - **Files:** `backend/server.py` (`POST /api/contact`), `backend/requirements.txt`
@@ -132,12 +137,15 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
   `apple-touch-icon.png`, `logo.png`); reference local paths; replace the hardcoded
   remote URL constants in the three components with a shared local asset import.
 
-#### SEO-7 / PERF-6a · Drop the forbidden Inter font `P1` `S`
+#### SEO-7 / PERF-6a · Drop the unused Inter font `P1` `S`
 - **Files:** `frontend/public/index.html` (Google Fonts `Inter` link + preconnects)
-- **Problem:** `index.html` loads `Inter:wght@600` — explicitly forbidden by
-  `design_guidelines.json` and used only by the Emergent badge. The real fonts
-  (Outfit + IBM Plex Sans) already load via `src/index.css`.
+- **Problem:** `index.html` loads `Inter:wght@600`, which `design_guidelines.json`
+  forbids **for headings** ("Do not use generic sans for headings") — not a blanket
+  ban. Here it isn't used by the UI at all (only the Emergent badge consumes it), so
+  it's a wasted render-blocking request. The real fonts (Outfit + IBM Plex Sans)
+  already load via `src/index.css`.
 - **Steps:** remove the Inter `<link>` (and now-unneeded preconnects) when removing the badge.
+- **Note:** this is the Inter-removal subset of `PERF-6`; the rest of the font work lives in Phase 4.
 
 #### SEO-8 · Correct `theme-color` to brand background `P1` `S`
 - **Files:** `frontend/public/index.html`
@@ -153,10 +161,16 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
   effectively invisible for organic discovery.
 - **Steps (pick one):**
   - **Build-time prerender (lighter):** add `react-snap` / `react-snapshot` to emit
-    static HTML for `/` and each `/case-study/:slug` at build.
-  - **Framework migration (durable):** move to Next.js (SSG/ISR) — larger effort,
-    best long-term for a content/marketing site.
-- **Done when:** `view-source` of `/` and a case-study URL contains real headings/copy.
+    static HTML for `/` (and each `/case-study/:slug`). ⚠️ Case-study copy is fetched at
+    runtime from `/api/case-studies` (`CaseStudies.js`, `CaseStudyPage.js`), so a snapshot
+    only captures real content if the API is **reachable at build time** — snapshot
+    against a live/seeded API, or move the seed `CASE_STUDIES` into the build. Without
+    that, prerender covers only the static `/` route.
+  - **Framework migration (durable):** move to Next.js (SSG/ISR) — larger effort, best
+    long-term for a content/marketing site, and the cleanest path for the dynamic
+    case-study pages.
+- **Done when:** `view-source` of `/` contains real headings/copy; case-study URLs do too
+  **once** their data is available at build time (or via the SSG path).
 
 #### SEO-2 · Per-route `<title>`/meta with a head manager `P0` `M`
 - **Files:** `frontend/src/App.js`, `pages/*.js`, new head usage
@@ -238,16 +252,17 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
 
 ### A11Y-3 · Fix tertiary-grey contrast failure `P1` `S`
 - **Files:** `src/index.css` (`--text-tertiary: #68647D`)
-- **Problem:** `#68647D` on `#050211` ≈ 3.6:1 — fails AA (4.5:1) for the small
+- **Problem:** `#68647D` on `#050211` ≈ 3.62:1 — fails AA (4.5:1) for the small
   labels/links/placeholder it's used on.
-- **Steps:** lighten to ~`#8B879E` (≈4.6:1), or restrict the color to non-essential decoration.
+- **Steps:** lighten to ~`#8B879E` (≈5.9:1 — comfortably clears AA), or restrict the
+  color to non-essential decoration.
 
 ### A11Y-4 · Fix accent-text contrast `P1` `S`
 - **Files:** components using `text-[#D111A2]`/`text-[#9D4CDD]` eyebrow labels
-- **Problem:** magenta ≈ 4.2:1, purple ≈ 4.4:1 on the background — fail AA for the
-  `text-xs` labels.
-- **Steps:** use a lighter shade for *text* use (e.g. `#E84FC4`) or enlarge eyebrow
-  labels to large-text size; keep the original colors for icons/decoration.
+- **Problem:** magenta `#D111A2` ≈ 4.22:1, purple `#9D4CDD` ≈ 4.41:1 on the background —
+  both fail AA (4.5:1) for the `text-xs` labels.
+- **Steps:** use a lighter shade for *text* use (e.g. `#E84FC4` ≈ 6.2:1) or enlarge
+  eyebrow labels to large-text size; keep the original colors for icons/decoration.
 
 ### A11Y-5 · Skip-to-content link + `<main>` landmark `P1` `S`
 - **Files:** `HomePage.js`, `CaseStudyPage.js`
@@ -288,8 +303,10 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
 - **Files:** `Testimonials.js`, `CaseStudies.js`, `Team.js`, `CaseStudyPage.js`
 - **Steps:** drop redundant "photo"/"image"/"thumbnail" suffixes from alt text.
 
-> Note: `A11Y-11` (dead `href="#"` Privacy/Terms) and `A11Y-16/17` are tracked under
-> Phase 6 (content) and SEO-2 respectively.
+> Notes on deferred a11y items:
+> - `A11Y-11` (dead `href="#"` Privacy/Terms links) → handled with the content fix in **Phase 6 (`SEO-15`)**.
+> - `A11Y-16` (color used as the *sole* carrier of state, e.g. nav hover) → largely resolved once focus (`A11Y-2`) and contrast (`A11Y-4`) land; no separate work.
+> - `A11Y-17` (per-route `document.title`) → covered by **`SEO-2`** (head metadata).
 
 ---
 
@@ -300,15 +317,17 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
 ### FE-1 / PERF-2 · Delete dead shadcn UI & purge frontend deps `P1` `M`
 - **Files:** `frontend/src/components/ui/` (46 files), `frontend/src/hooks/use-toast.js`,
   `frontend/src/lib/utils.js`, `frontend/package.json`
-- **Problem:** Nothing imports `components/ui/*`; it's the only consumer of ~40 deps
-  (all 28 `@radix-ui/*`, `recharts`, `embla-carousel-react`, `cmdk`, `vaul`,
+- **Problem:** Nothing imports `components/ui/*`; it's the only consumer of ~40 deps —
+  all **27** `@radix-ui/react-*` packages, `embla-carousel-react`, `cmdk`, `vaul`,
   `input-otp`, `react-day-picker`, `react-resizable-panels`, `next-themes`,
-  `class-variance-authority`, `react-hook-form`, `@hookform/resolvers`, `zod`).
-  `react-fast-marquee` and `date-fns` aren't imported anywhere.
-- **Steps:** delete `ui/`, `use-toast.js`, `utils.js` (unless adopting shadcn);
-  prune `package.json` to the real set (`react`, `react-dom`, `react-router-dom`,
-  `framer-motion`, `lucide-react`, `axios`, `sonner`, `clsx`, `tailwind-merge`);
-  re-lock and verify `yarn build`.
+  `class-variance-authority`, and `react-hook-form` (via `ui/form.jsx`). Separately,
+  `recharts`, `@hookform/resolvers`, `zod`, `react-fast-marquee`, and `date-fns` are
+  imported **nowhere at all** (not even by `ui/`).
+- **Steps:** delete `ui/` and `src/lib/utils.js` (unless adopting shadcn; `use-toast.js`
+  is handled in `FE-9`); prune `package.json` to the real set — `react`, `react-dom`,
+  `react-router-dom`, `framer-motion`, `lucide-react`, `axios`, `sonner`. (`clsx` and
+  `tailwind-merge` are imported **only** by the deleted `utils.js`, so they go too.)
+  Re-lock and verify `yarn build`.
 - **Done when:** build passes with the trimmed dependency list.
 
 ### SEC-10 / PERF-1 · Slim the backend dependencies `P1` `S`
@@ -317,21 +336,26 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
   yet requirements pin `openai`, `litellm`, `google-genai`, `boto3`, `pandas`, `numpy`,
   `stripe`, `huggingface_hub`, `emergentintegrations`, unused auth libs
   (`python-jose`, `PyJWT`, `passlib`, `ecdsa`), etc. (~600MB–1GB; large CVE surface).
-- **Steps:** reduce runtime requirements to what's imported (`fastapi`, `uvicorn`,
-  `motor`/`pymongo`, `pydantic`, `email-validator`, `python-dotenv`,
-  `python-multipart`, `resend`, `slowapi` from SEC-4); move `pytest`/`black`/`flake8`/
-  `mypy`/`isort` to `dev-requirements.txt`.
+- **Steps:** reduce runtime requirements to what's imported — `fastapi`, `starlette`
+  (a direct import at `server.py:3`, though it also rides in via `fastapi`), `uvicorn`,
+  `motor`/`pymongo`, `pydantic`, `email-validator`, `python-dotenv`, `resend`, plus
+  `slowapi` (from SEC-4). Move `pytest`, `requests` (the live-HTTP suite's only HTTP
+  client), `black`/`flake8`/`mypy`/`isort` to `dev-requirements.txt`. Drop
+  `python-multipart` — the API takes only JSON (no `Form`/`File`), so nothing needs it
+  until a multipart endpoint is added.
 - **Done when:** prod image installs only what runs; app boots; tests pass.
 
 ### FE-2 · Remove the non-functional Tailwind token layer `P2` `S`
 - **Files:** `frontend/tailwind.config.js`, `src/index.css`
-- **Problem:** Config references `hsl(var(--background))` etc., but `index.css`
-  defines `--background` as hex and never defines `--foreground`/`--primary`/`--card`/
-  `--border`/`--ring`… so every semantic Tailwind color utility is silently broken.
-  The app only works because colors are hardcoded inline.
-- **Steps:** delete the vestigial `colors`/`borderRadius` token block (and the unused
-  `:root --radius`), **or** commit to a real token system by defining the HSL channels
-  and refactoring components to `text-primary` etc. Don't keep the half-state.
+- **Problem:** The config references `hsl(var(--foreground))`/`--primary`/`--card`/
+  `--border`/`--ring`… but `index.css` never defines those, and defines `--background`
+  as a *hex* (so `hsl(#050211)` is invalid). Every semantic Tailwind **color** utility
+  is therefore silently broken; the app only works because colors are hardcoded inline.
+  Note: `--radius` is **not** dead — `borderRadius.lg/md/sm` read it and
+  `tailwindcss-animate` relies on it, so leave it in place.
+- **Steps:** delete the vestigial `colors` token block, **or** commit to a real token
+  system by defining the HSL channels and refactoring components to `text-primary` etc.
+  Leave `--radius` and the `borderRadius` scale alone. Don't keep the half-state.
 
 ### FE-3 · Shared API client `P1` `S`
 - **Files:** new `frontend/src/lib/api.js`; `Contact.js`, `CaseStudies.js`, `CaseStudyPage.js`
@@ -368,13 +392,22 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
 - **Steps:** move to `src/data/*.js` (or fetch from the backend like case studies);
   de-duplicate founders into one source consumed by both.
 
-### FE-8 · Decide the form strategy `P2` `S`
+### FE-8 · Decide the form strategy `P2` `S` _(coupled to FE-1)_
 - **Files:** `Contact.js`
-- **Problem:** Manual `useState` form with no inline validation, while
-  `react-hook-form`+`zod` are installed but unused.
-- **Steps:** pick one — keep manual but add inline validation/email regex (and drop
-  the unused libs in FE-1), **or** wire up `react-hook-form`+`zod` with a schema and
-  field-level errors.
+- **Problem:** Manual `useState` form with no inline validation. `react-hook-form` is
+  imported only by the dead `ui/form.jsx`; `zod`/`@hookform/resolvers` are imported
+  nowhere — so they're *effectively* unused, but note the coupling: choosing the
+  rhf+zod path here means **re-adding deps that `FE-1` removes**.
+- **Steps:** prefer **manual + inline validation/email regex** (keeps `FE-1`'s deletion
+  intact), **unless** react-hook-form is wanted elsewhere — in which case wire up
+  `react-hook-form`+`zod` with a schema and field-level errors and retain them in `package.json`.
+
+### FE-9 · Remove the dead toast system `P3` `S`
+- **Files:** `frontend/src/hooks/use-toast.js`, `Contact.js`, `App.js`
+- **Problem:** `use-toast.js` (the shadcn toast hook) is imported only by the dead
+  `ui/` tree; the app actually uses `sonner` directly (`App.js` `Toaster`, `Contact.js`
+  `toast`). Two parallel toast systems is confusing.
+- **Steps:** delete `src/hooks/use-toast.js` (alongside the `FE-1` cleanup) and standardize on `sonner`.
 
 ### FE-10 / PERF-5 · Route-level code splitting `P2` `S`
 - **Files:** `frontend/src/App.js`
@@ -442,9 +475,9 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
 
 ### PERF-6 · Trim & speed up fonts `P2` `S`
 - **Files:** `frontend/public/index.html`, `frontend/src/index.css`
-- **Problem:** Inter is loaded but unused (see SEO-7); Outfit+IBM Plex load via a CSS
-  `@import` (serialized after CSS parse) with 9 weights.
-- **Steps:** remove Inter; move the font load from CSS `@import` to a `<link rel="preload">`
+- **Problem:** Outfit+IBM Plex load via a CSS `@import` (serialized after CSS parse) with
+  9 weights. (Inter removal is split out as `SEO-7`/`PERF-6a`.)
+- **Steps:** move the font load from CSS `@import` to a `<link rel="preload">`
   /`<link rel="stylesheet">` in `index.html`; trim to weights actually used
   (e.g. Outfit 400/600/700, IBM Plex 400/500); keep `display=swap`.
 
@@ -509,9 +542,11 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
 ## Phase 6 — Content & Hygiene Polish
 
 ### SEO-9 · Reconcile location vs phone `P2` `S`
-- **Files:** `Contact.js`, `Footer.js`
-- **Problem:** "San Francisco, CA" paired with a `(602)` Arizona phone number.
-- **Steps:** set the real operating location (or drop the line if remote); make phone/location consistent.
+- **Files:** `Contact.js` (location `:95` + phone `:85`), `Footer.js` (phone only, `:106`/`:109`)
+- **Problem:** `Contact.js` pairs "San Francisco, CA" with a `(602)` (Phoenix, AZ) phone
+  number. `Footer.js` carries the same phone but **no** location string.
+- **Steps:** in `Contact.js`, set the real operating location (or drop the line if remote)
+  so location/phone agree; in `Footer.js` only the phone needs to match.
 
 ### SEO-10 · Verify outbound claims `P2` `S`
 - **Files:** `GitHubCallout.js`, `backend/server.py` (myCSA results/testimonial), `Services.js`
@@ -597,6 +632,7 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
 - [ ] FE-6 Robust data fetching
 - [ ] FE-7 Extract content to data modules
 - [ ] FE-8 Form strategy
+- [ ] FE-9 Remove dead toast system
 - [ ] FE-10 Code splitting
 - [ ] FE-11 Dead CSS cleanup
 - [ ] FE-12 Minor anti-patterns
@@ -636,14 +672,14 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
 Keep PRs small and reviewable. A natural sequence:
 
 1. **`security/critical-hardening`** — SEC-1–5 (+SEC-11 note). *Ship first.*
-2. **`chore/de-emergent`** — SEO-4/5/7/8, PERF-6 (badge/scripts/font/favicon/theme-color).
+2. **`chore/de-emergent`** — SEO-4/5/7/8 + `PERF-6a` (badge/scripts/Inter-font/favicon/theme-color).
 3. **`chore/dep-purge`** — FE-1 + SEC-10 (frontend `ui/` delete + backend requirements).
 4. **`feat/seo-foundation`** — SEO-1/2/3/6 (prerender + helmet + OG + robots/sitemap/JSON-LD).
 5. **`chore/devex-foundation`** — DX-1/2/3/4 (CI, READMEs, env examples).
 6. **`a11y/baseline`** — A11Y-1–15 (can split motion+focus+contrast from the rest).
 7. **`refactor/frontend-architecture`** — FE-2–12.
 8. **`refactor/backend-modernization`** — SEC-6–9.
-9. **`perf/media`** — PERF-3/4/7.
+9. **`perf/media`** — PERF-3/4/6/7 (incl. the remaining font work in `PERF-6`).
 10. **`test/hermetic-suite-and-gates`** — TEST-1, DX-5–10.
 11. **`content/polish`** — SEO-9/10/11/12/15, DX-11/12.
 
