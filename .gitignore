@@ -52,6 +52,12 @@ __pycache__/
 venv/
 .venv/
 
+# Generated test artifacts (keep the folder via .gitkeep, ignore the reports)
+test_reports/pytest/*.xml
+
+# Stray shell-redirect junk, e.g. `pip install 'resend>=2.0.0'` creating a file named =2.0.0
+=*
+
 # Development tools
 chainlit.md
 .chainlit

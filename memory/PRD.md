@@ -71,8 +71,8 @@ Build a modern, glassy UI styled, rounded corner type but also futuristic tech c
 ## Testing Status
 - Backend: 100% (10/10 pytest tests passed)
 - Frontend: 100% (all critical flows validated)
-- Test reports: /app/test_reports/iteration_1.json through iteration_5.json
-- Pytest suite: /app/backend/tests/test_quasar_api.py
+- Test reports: test_reports/iteration_1.json through iteration_5.json
+- Pytest suite: backend/tests/test_quasar_api.py
 
 ## Prioritized Backlog
 

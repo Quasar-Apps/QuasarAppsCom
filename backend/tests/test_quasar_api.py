@@ -1,13 +1,24 @@
-"""Backend API tests for Quasar Apps - case studies, contact form, status checks."""
+"""Backend API tests for Quasar Apps - case studies, contact form, status checks.
+
+These are integration tests that exercise a LIVE backend over HTTP. Set
+REACT_APP_BACKEND_URL to the target server to run them; otherwise the whole
+module is skipped so a bare ``pytest`` run never silently hits a shared remote
+deployment (or fails when offline).
+"""
 import os
+import uuid
+
 import pytest
 import requests
-from datetime import datetime
 
-BASE_URL = os.environ.get(
-    "REACT_APP_BACKEND_URL", "https://quantum-ui-3.preview.emergentagent.com"
-).rstrip("/")
+BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "").rstrip("/")
 API_URL = f"{BASE_URL}/api"
+
+# Skip the entire module unless an explicit backend URL is provided.
+pytestmark = pytest.mark.skipif(
+    not BASE_URL,
+    reason="Set REACT_APP_BACKEND_URL to run the live backend integration tests.",
+)
 
 
 @pytest.fixture(scope="module")
@@ -60,7 +71,7 @@ class TestCaseStudies:
 class TestContact:
     def test_submit_contact_valid(self, api_client):
         payload = {
-            "name": f"TEST_User_{datetime.now().strftime('%H%M%S')}",
+            "name": f"TEST_User_{uuid.uuid4().hex[:8]}",
             "email": "test@example.com",
             "company": "TEST_Company",
             "message": "This is a TEST_ pytest message.",
@@ -117,7 +128,7 @@ class TestContact:
 # ---- Status (legacy) ----
 class TestStatus:
     def test_create_and_get_status(self, api_client):
-        payload = {"client_name": f"TEST_Client_{datetime.now().strftime('%H%M%S')}"}
+        payload = {"client_name": f"TEST_Client_{uuid.uuid4().hex[:8]}"}
         r = api_client.post(f"{API_URL}/status", json=payload, timeout=10)
         assert r.status_code == 200
         created = r.json()
