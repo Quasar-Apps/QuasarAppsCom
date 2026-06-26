@@ -55,13 +55,13 @@ const Contact = () => {
               Contact Us
             </span>
             <h2 className="text-4xl sm:text-5xl font-light tracking-tight text-white mb-8">
-              Let's build
+              Let&apos;s build
               <br />
               something <span className="gradient-text">amazing</span>
             </h2>
             <p className="text-[#A09DB0] leading-relaxed text-lg mb-12">
-              Have a project in mind? We'd love to hear about it. 
-              Drop us a message and let's start a conversation about 
+              Have a project in mind? We&apos;d love to hear about it. 
+              Drop us a message and let&apos;s start a conversation about 
               bringing your ideas to life.
             </p>
 
@@ -195,11 +195,6 @@ const Contact = () => {
                   disabled={loading}
                   className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed relative z-20"
                   data-testid="contact-submit-button"
-                  onClick={(e) => {
-                    if (!loading) {
-                      e.currentTarget.form?.requestSubmit();
-                    }
-                  }}
                 >
                   {loading ? (
                     <div className="w-5 h-5 border-2 border-[#050211] border-t-transparent rounded-full animate-spin" />

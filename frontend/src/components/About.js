@@ -33,12 +33,12 @@ const About = () => {
               great experiences
             </h2>
             <p className="text-[#A09DB0] leading-relaxed text-lg mb-6">
-              At Quasar Apps, we're not just developers—we're experience architects. 
+              At Quasar Apps, we&apos;re not just developers—we&apos;re experience architects. 
               Our UX-led approach means every pixel, every interaction, and every 
               line of code is crafted with your users in mind.
             </p>
             <p className="text-[#A09DB0] leading-relaxed text-lg">
-              We're building tools we believe in, starting with myCSA.app—a farm 
+              We&apos;re building tools we believe in, starting with myCSA.app—a farm 
               management platform made by people who understand the real challenges 
               of running operations. We bring that same user-first philosophy to 
               every project we take on.

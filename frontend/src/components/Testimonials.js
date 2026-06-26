@@ -68,7 +68,8 @@ const Testimonials = () => {
                 <div className="flex items-center gap-4">
                   <img 
                     src={testimonials[current].image}
-                    alt={testimonials[current].author}
+                    alt={`${testimonials[current].author} photo`}
+                    loading="lazy"
                     className="w-14 h-14 rounded-full object-cover border-2 border-[#D111A2]/30"
                   />
                   <div>

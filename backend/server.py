@@ -16,6 +16,13 @@ import resend
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
+# Configure logging first
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
@@ -127,7 +134,7 @@ async def create_status_check(input: StatusCheckCreate):
 
 @api_router.get("/status", response_model=List[StatusCheck])
 async def get_status_checks():
-    status_checks = await db.status_checks.find({}, {"_id": 0}).to_list(1000)
+    status_checks = await db.status_checks.find({}, {"_id": 0}).sort("timestamp", -1).to_list(1000)
     
     for check in status_checks:
         if isinstance(check['timestamp'], str):
@@ -204,7 +211,7 @@ async def submit_contact(input: ContactMessageCreate):
 
 @api_router.get("/contact", response_model=List[ContactMessage])
 async def get_contact_messages():
-    messages = await db.contact_messages.find({}, {"_id": 0}).to_list(1000)
+    messages = await db.contact_messages.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
     
     for msg in messages:
         if isinstance(msg['created_at'], str):
@@ -222,13 +229,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
 
 @app.on_event("shutdown")
 async def shutdown_db_client():

@@ -14,6 +14,7 @@ const CaseStudyPage = () => {
   const [caseStudy, setCaseStudy] = useState(null);
   const [allStudies, setAllStudies] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -24,8 +25,10 @@ const CaseStudyPage = () => {
         ]);
         setCaseStudy(studyRes.data);
         setAllStudies(allRes.data);
-      } catch (error) {
-        console.error("Error fetching case study:", error);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching case study:", err);
+        setError(err.response?.status === 404 ? "not_found" : "error");
       } finally {
         setLoading(false);
       }
@@ -42,12 +45,19 @@ const CaseStudyPage = () => {
     );
   }
 
-  if (!caseStudy) {
+  if (!caseStudy || error) {
     return (
       <div className="min-h-screen cosmic-bg">
         <Navigation />
         <div className="pt-32 px-6 text-center">
-          <h1 className="text-4xl font-light text-white mb-4">Case Study Not Found</h1>
+          <h1 className="text-4xl font-light text-white mb-4">
+            {error === "not_found" ? "Case Study Not Found" : "Something went wrong"}
+          </h1>
+          <p className="text-[#A09DB0] mb-8">
+            {error === "not_found" 
+              ? "The case study you're looking for doesn't exist."
+              : "We couldn't load this case study. Please try again."}
+          </p>
           <Link to="/" className="btn-primary inline-block">Go Home</Link>
         </div>
       </div>
@@ -67,7 +77,7 @@ const CaseStudyPage = () => {
         <div className="absolute inset-0">
           <img 
             src={caseStudy.hero_image} 
-            alt={caseStudy.title}
+            alt={`${caseStudy.title} hero image`}
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 hero-gradient" />
@@ -297,7 +307,7 @@ const CaseStudyPage = () => {
             className="max-w-4xl mx-auto text-center"
           >
             <div className="relative">
-              <span className="text-8xl text-[#D111A2]/20 font-serif absolute -top-8 left-0">"</span>
+              <span className="text-8xl text-[#D111A2]/20 font-serif absolute -top-8 left-0">&quot;</span>
               <blockquote className="text-2xl sm:text-3xl font-light text-white leading-relaxed mb-8 relative z-10">
                 {caseStudy.testimonial}
               </blockquote>
