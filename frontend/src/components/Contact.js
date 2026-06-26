@@ -13,6 +13,7 @@ const Contact = () => {
     email: "",
     company: "",
     message: "",
+    website: "", // honeypot — must stay empty for real users
   });
   const [loading, setLoading] = useState(false);
 
@@ -27,7 +28,7 @@ const Contact = () => {
     try {
       await axios.post(`${API}/contact`, formData);
       toast.success("Message sent successfully! We'll be in touch soon.");
-      setFormData({ name: "", email: "", company: "", message: "" });
+      setFormData({ name: "", email: "", company: "", message: "", website: "" });
     } catch (error) {
       console.error("Error submitting form:", error);
       toast.error("Failed to send message. Please try again.");
@@ -111,9 +112,20 @@ const Contact = () => {
               data-testid="contact-form"
             >
               <div className="space-y-6">
+                {/* Honeypot: hidden from users; bots that fill it are silently dropped server-side */}
+                <input
+                  type="text"
+                  name="website"
+                  value={formData.website}
+                  onChange={handleChange}
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                  style={{ position: "absolute", left: "-9999px", width: "1px", height: "1px", opacity: 0 }}
+                />
                 <div>
-                  <label 
-                    htmlFor="name" 
+                  <label
+                    htmlFor="name"
                     className="block text-sm text-[#A09DB0] mb-2"
                   >
                     Name *

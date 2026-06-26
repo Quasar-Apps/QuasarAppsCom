@@ -85,11 +85,6 @@ class TestContact:
         assert data["message"] == payload["message"]
         assert "id" in data and isinstance(data["id"], str)
         assert "created_at" in data
-        # Verify persistence
-        r2 = api_client.get(f"{API_URL}/contact", timeout=10)
-        assert r2.status_code == 200
-        messages = r2.json()
-        assert any(m["id"] == data["id"] for m in messages)
 
     def test_submit_contact_without_company(self, api_client):
         payload = {
@@ -116,26 +111,36 @@ class TestContact:
         r = api_client.post(f"{API_URL}/contact", json=payload, timeout=10)
         assert r.status_code == 422
 
-    def test_get_contact_messages_no_objectid(self, api_client):
+    def test_submit_contact_message_too_long_returns_422(self, api_client):
+        payload = {
+            "name": "TEST_Long",
+            "email": "long@example.com",
+            "message": "x" * 5001,  # exceeds the 5000-char cap
+        }
+        r = api_client.post(f"{API_URL}/contact", json=payload, timeout=10)
+        assert r.status_code == 422
+
+    def test_submit_contact_honeypot_silently_dropped(self, api_client):
+        # A populated honeypot ("website") is accepted but not stored/emailed.
+        payload = {
+            "name": "TEST_Bot",
+            "email": "bot@example.com",
+            "message": "spam",
+            "website": "http://spam.example",
+        }
+        r = api_client.post(f"{API_URL}/contact", json=payload, timeout=10)
+        assert r.status_code == 200
+
+    def test_contact_list_endpoint_removed(self, api_client):
+        # The public PII read endpoint was removed; only POST remains.
         r = api_client.get(f"{API_URL}/contact", timeout=10)
-        assert r.status_code == 200
-        data = r.json()
-        assert isinstance(data, list)
-        for m in data:
-            assert "_id" not in m
+        assert r.status_code in (404, 405)
 
 
-# ---- Status (legacy) ----
-class TestStatus:
-    def test_create_and_get_status(self, api_client):
-        payload = {"client_name": f"TEST_Client_{uuid.uuid4().hex[:8]}"}
-        r = api_client.post(f"{API_URL}/status", json=payload, timeout=10)
-        assert r.status_code == 200
-        created = r.json()
-        assert created["client_name"] == payload["client_name"]
-        assert "id" in created
-
-        r2 = api_client.get(f"{API_URL}/status", timeout=10)
-        assert r2.status_code == 200
-        items = r2.json()
-        assert any(s["id"] == created["id"] for s in items)
+# ---- Status (removed in Phase 0 security hardening) ----
+class TestStatusRemoved:
+    def test_status_endpoints_removed(self, api_client):
+        assert api_client.get(f"{API_URL}/status", timeout=10).status_code == 404
+        assert api_client.post(
+            f"{API_URL}/status", json={"client_name": "x"}, timeout=10
+        ).status_code == 404
