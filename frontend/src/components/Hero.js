@@ -41,7 +41,7 @@ const Hero = () => {
         initial={{ opacity: 0, scale: 0.8, x: 100 }}
         animate={{ opacity: 1, scale: 1, x: 0 }}
         transition={{ duration: 1.2, ease: "easeOut" }}
-        className="absolute right-[-5%] md:right-[5%] top-[35%] -translate-y-1/2 w-[50%] md:w-[35%] pointer-events-none z-0"
+        className="absolute right-[-5%] md:right-[5%] top-[15%] md:top-[20%] -translate-y-1/2 w-[50%] md:w-[35%] pointer-events-none z-0"
       >
         <motion.img 
           src={ICON_URL} 
