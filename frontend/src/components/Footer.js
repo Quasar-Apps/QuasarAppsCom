@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-const LOGO_URL = "https://customer-assets.emergentagent.com/job_quantum-ui-3/artifacts/7pbry2i0_816de68f-f17b-4eac-a712-2b274cb965a5.png";
+const LOGO_URL = process.env.PUBLIC_URL + "/logo.png";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
