@@ -43,8 +43,11 @@ jobs:
           cache-dependency-path: frontend/yarn.lock
       - name: Activate pinned Yarn (Corepack)
         # Uses the packageManager field in package.json (yarn@1.22.22) so the build
-        # doesn't depend on the runner's ambient Yarn version.
-        run: corepack enable
+        # doesn't depend on the runner's ambient Yarn version. Echo the version so the
+        # pin is observable in logs and fails loudly if the shim is ever shadowed.
+        run: |
+          corepack enable
+          yarn --version
       - name: Install dependencies
         run: yarn install --frozen-lockfile
       - name: Build
@@ -65,8 +68,8 @@ jobs:
       - name: Syntax check
         run: python -m py_compile backend/server.py backend/tests/test_quasar_api.py
       - name: Install test tooling
-        # Pinned to the versions in backend/requirements.txt. Switch to
-        # `python -m pip install -r backend/dev-requirements.txt` when DX-7/TEST-1 land.
-        run: python -m pip install pytest==9.0.2 requests==2.32.5
+        # Pinned dev/test deps, kept out of the runtime requirements.txt.
+        # DX-7/TEST-1 will expand backend/dev-requirements.txt (black/flake8/mypy, etc.).
+        run: python -m pip install -r backend/dev-requirements.txt
       - name: Pytest (integration suite skips unless REACT_APP_BACKEND_URL is set)
         run: python -m pytest backend/tests -q
