@@ -2,11 +2,16 @@ name: CI
 
 # Quality gate for the develop -> main flow. Keep this green before merging.
 #
-# Scope is intentionally a foundation (DX-1): it catches real build/compile breakage
-# and that the test suite still collects. Stricter checks land in later roadmap phases:
+# IMPORTANT: a workflow only RUNS checks — it does not BLOCK merges. To make the gate
+# real, configure branch protection / a ruleset on `main` (and `develop`) in repo
+# Settings to require the "Frontend build" and "Backend checks" status checks to pass
+# before merging. That is a repo Settings step and can't be expressed in this file.
+#
+# Scope is intentionally a foundation (DX-1): it catches real build/compile breakage and
+# that the test suite still collects. Stricter checks land in later roadmap phases:
 #   - DX-7: flake8/black/mypy config + backend lint
 #   - DX-8: eslint flat config + Prettier (then flip the frontend build to CI=true)
-#   - TEST-1: hermetic in-process backend tests (so pytest actually exercises the API here)
+#   - TEST-1: hermetic in-process backend tests + a pinned backend/dev-requirements.txt
 
 on:
   push:
@@ -16,6 +21,11 @@ on:
 
 permissions:
   contents: read
+
+# Cancel superseded runs on rapid pushes to the same ref.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   frontend:
@@ -31,6 +41,10 @@ jobs:
           node-version: 20
           cache: yarn
           cache-dependency-path: frontend/yarn.lock
+      - name: Activate pinned Yarn (Corepack)
+        # Uses the packageManager field in package.json (yarn@1.22.22) so the build
+        # doesn't depend on the runner's ambient Yarn version.
+        run: corepack enable
       - name: Install dependencies
         run: yarn install --frozen-lockfile
       - name: Build
@@ -51,6 +65,8 @@ jobs:
       - name: Syntax check
         run: python -m py_compile backend/server.py backend/tests/test_quasar_api.py
       - name: Install test tooling
-        run: pip install pytest requests
+        # Pinned to the versions in backend/requirements.txt. Switch to
+        # `python -m pip install -r backend/dev-requirements.txt` when DX-7/TEST-1 land.
+        run: python -m pip install pytest==9.0.2 requests==2.32.5
       - name: Pytest (integration suite skips unless REACT_APP_BACKEND_URL is set)
-        run: pytest backend/tests -q
+        run: python -m pytest backend/tests -q
