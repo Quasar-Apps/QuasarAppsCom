@@ -5,13 +5,13 @@ const team = [
   {
     name: "Martin Osorio",
     role: "Co-Founder & Tech Lead",
-    image: "https://customer-assets.emergentagent.com/job_quantum-ui-3/artifacts/v06tg0kj_20260408_150655.jpg",
+    image: process.env.PUBLIC_URL + "/team/martin-osorio.jpg",
     linkedin: "https://www.linkedin.com/in/martinosoriolopez/",
   },
   {
     name: "Christiana Bowen",
     role: "Co-Founder & User Experience Lead",
-    image: "https://customer-assets.emergentagent.com/job_quantum-ui-3/artifacts/mrbyv6qp_1765492820351.jpg",
+    image: process.env.PUBLIC_URL + "/team/christiana-bowen.jpg",
     linkedin: "https://www.linkedin.com/in/uxbowen/",
   },
 ];

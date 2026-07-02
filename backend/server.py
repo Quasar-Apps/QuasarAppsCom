@@ -234,8 +234,9 @@ async def submit_contact(request: Request, input: ContactMessageCreate):
 # Include the router in the main app
 app.include_router(api_router)
 
-# CORS — credentials disabled so a wildcard origin is safe; methods/headers pinned.
-# Set CORS_ORIGINS to the production frontend origin(s) to lock origins down further.
+# CORS — credentials disabled, so a wildcard origin doesn't expose authenticated
+# data (CORS is not an auth boundary); methods/headers are pinned. Set CORS_ORIGINS
+# to the production frontend origin(s) to restrict cross-origin access.
 _cors_origins = [o.strip() for o in os.environ.get('CORS_ORIGINS', '*').split(',') if o.strip()]
 app.add_middleware(
     CORSMiddleware,

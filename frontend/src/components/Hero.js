@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 
-const ICON_URL = "https://customer-assets.emergentagent.com/job_quantum-ui-3/artifacts/7pbry2i0_816de68f-f17b-4eac-a712-2b274cb965a5.png";
+const ICON_URL = process.env.PUBLIC_URL + "/logo.png";
 
 const Hero = () => {
   const scrollToServices = () => {
