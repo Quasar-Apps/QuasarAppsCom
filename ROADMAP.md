@@ -26,7 +26,7 @@ The team will graduate off Emergent **eventually**, but keeps it as the **primar
 - Work is therefore tagged by **lane**:
   - 🟢 **Emergent-safe** — new/infra files Emergent doesn't manage (CI, docs, tests, `frontend/public/*.txt`) and backend-only logic → fine as hand-PRs.
   - ⚙️ **Do-via-Emergent** — frontend/UX/content → make the change *through* Emergent's agent so it sticks.
-  - 🔒 **Gated on graduation** — only changes that **sever Emergent's linkage or block its write model**: untracking `.emergent/`, migrating off the CRA/CRACO scaffold (SSR), or required-PR branch protection (which blocks Emergent's direct pushes). The test is *"does this break Emergent's ability to keep working here?"* — **not** *"does Emergent touch this file?"* By that test, deleting/refactoring frontend files Emergent regenerates is ⚙️ (do it via Emergent), and removing an **unused** backend dep — even the Emergent-branded `emergentintegrations`, which `server.py` never imports — is 🟢/⚙️, not 🔒. **Do not do 🔒 items while Emergent is primary.**
+  - 🔒 **Gated on graduation** — only changes that **sever Emergent's linkage or block its write model**: untracking `.emergent/`, migrating off the CRA/CRACO scaffold (SSR), or required-PR branch protection (which blocks Emergent's direct pushes). The test is *"does this break Emergent's ability to keep working here?"* — **not** *"does Emergent touch this file?"* By that test, deleting/refactoring frontend files Emergent regenerates is ⚙️ (do it via Emergent), and removing an **unused** backend dep — even the Emergent-branded `emergentintegrations`, which `backend/server.py` never imports — is 🟢/⚙️, not 🔒. **Do not do 🔒 items while Emergent is primary.**
 - **Graduation prerequisite:** before any 🔒 item, cut Emergent's write access to the repo so it stops auto-committing — otherwise removals aren't durable.
 
 ### Shipped status
@@ -51,7 +51,7 @@ The team will graduate off Emergent **eventually**, but keeps it as the **primar
 | **1 — Slice 2 · De-Emergent** | ✅ done (on `develop`) | ⚙️ | Emergent may re-inject — watch for churn |
 | **1 — Slice 3 · SEO foundation** | ⬜ todo | ⚙️ / 🔒 | 🟢 subset = `robots.txt` + `sitemap.xml` **only** (new `frontend/public/` files Emergent doesn't manage); the `manifest.json` `<link>` + JSON-LD `<script>` inject into Emergent-managed `frontend/public/index.html` → ⚙️; SSR/helmet/OG = via-Emergent or graduation |
 | **2 — Accessibility** | ⬜ todo | ⚙️ | frontend-heavy → do via Emergent |
-| **3 — Architecture / deps** | ⬜ todo | 🟢 / ⚙️ | `SEC-6`–`10` = 🟢 backend (`SEC-10` removes unused deps incl. `emergentintegrations`, which `server.py` never imports — severs no linkage; Emergent may re-add, so make it durable via Emergent ⚙️); `FE-1` (delete dead UI) = ⚙️. No 🔒 items here. |
+| **3 — Architecture / deps** | ⬜ todo | 🟢 / ⚙️ | `SEC-6`–`10` = 🟢 backend (`SEC-10` removes unused deps incl. `emergentintegrations`, which `backend/server.py` never imports — severs no linkage; Emergent may re-add, so make it durable via Emergent ⚙️); `FE-1` (delete dead UI) = ⚙️. No 🔒 items here. |
 | **4 — Performance / media** | 🟡 partial | ⚙️ | `PERF-3` partly done in #7 (photos); rest frontend |
 | **5 — Testing & gates** | ⬜ todo | 🟢 | **best Emergent-safe lane to pick up next** |
 | **6 — Content & hygiene** | ⬜ todo | ⚙️ / 🔒 | content via Emergent; `DX-11` is 🔒 |
@@ -261,7 +261,7 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
 
 #### DX-3 · `.env.example` files `P1` `S`
 - **Files:** new `backend/.env.example`, `frontend/.env.example`
-- **Problem:** `server.py` hard-crashes on missing `MONGO_URL`/`DB_NAME`; required
+- **Problem:** `backend/server.py` hard-crashes on missing `MONGO_URL`/`DB_NAME`; required
   vars live only as prose in `memory/PRD.md`.
 - **Steps:** document every key with safe defaults/comments — backend
   (`MONGO_URL`, `DB_NAME`, `RESEND_API_KEY`, `CONTACT_EMAIL`, `CORS_ORIGINS`,
@@ -382,7 +382,7 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
 
 ### SEC-10 / PERF-1 · Slim the backend dependencies `P1` `S`
 - **Files:** `backend/requirements.txt`, new `backend/dev-requirements.txt`
-- **Problem:** `server.py` imports only FastAPI/Starlette/motor/pydantic/dotenv/resend,
+- **Problem:** `backend/server.py` imports only FastAPI/Starlette/motor/pydantic/dotenv/resend,
   yet requirements pin `openai`, `litellm`, `google-genai`, `boto3`, `pandas`, `numpy`,
   `stripe`, `huggingface_hub`, `emergentintegrations`, unused auth libs
   (`python-jose`, `PyJWT`, `passlib`, `ecdsa`), etc. (~600MB–1GB; large CVE surface).
@@ -393,7 +393,7 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
   client), `black`/`flake8`/`mypy`/`isort` to `dev-requirements.txt`. Drop
   `python-multipart` — the API takes only JSON (no `Form`/`File`), so nothing needs it
   until a multipart endpoint is added.
-- **Lane:** 🟢/⚙️ — every dep here is **unused** (`server.py` imports none of them,
+- **Lane:** 🟢/⚙️ — every dep here is **unused** (`backend/server.py` imports none of them,
   including the Emergent-branded `emergentintegrations`), so removing them severs no
   linkage and touches nothing in Emergent's write model → safe as a hand-PR (🟢). Caveat:
   Emergent may re-add its own deps on a future backend scaffold, so running the slim
