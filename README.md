@@ -72,9 +72,11 @@ The app calls `${REACT_APP_BACKEND_URL}/api/...`.
 ## Tests
 
 The backend suite (`backend/tests/`) is an HTTP integration suite. It **skips** unless a
-target backend is provided:
+target backend is provided. Install the pinned test tooling first — it's kept out of the
+runtime `requirements.txt` (see `backend/dev-requirements.txt`):
 
 ```bash
+pip install -r backend/dev-requirements.txt
 REACT_APP_BACKEND_URL=http://localhost:8000 pytest backend/tests -q
 ```
 
