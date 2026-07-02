@@ -24,9 +24,9 @@ The team will graduate off Emergent **eventually**, but keeps it as the **primar
 
 - Emergent auto-commits to `develop`/`main` (as `emergent-agent-e1`) and manages the frontend build, `index.html`, and scaffold. **Hand-PRs that touch Emergent-managed files can be silently reverted** on Emergent's next session (badge/telemetry/visual-edits/CDN assets especially).
 - Work is therefore tagged by **lane**:
-  - 🟢 **Emergent-safe** — new/infra files Emergent doesn't manage (CI, docs, tests, `public/*.txt`) and backend-only logic → fine as hand-PRs.
+  - 🟢 **Emergent-safe** — new/infra files Emergent doesn't manage (CI, docs, tests, `frontend/public/*.txt`) and backend-only logic → fine as hand-PRs.
   - ⚙️ **Do-via-Emergent** — frontend/UX/content → make the change *through* Emergent's agent so it sticks.
-  - 🔒 **Gated on graduation** — only changes that **sever Emergent's linkage or block its write model**: untracking `.emergent/`, dropping `emergentintegrations`, migrating off the CRA/CRACO scaffold (SSR), or required-PR branch protection (which blocks Emergent's direct pushes). The test is *"does this break Emergent's ability to keep working here?"* — **not** *"does Emergent touch this file?"* Deleting or refactoring frontend files Emergent regenerates is ⚙️ (do it via Emergent), not 🔒. **Do not do 🔒 items while Emergent is primary.**
+  - 🔒 **Gated on graduation** — only changes that **sever Emergent's linkage or block its write model**: untracking `.emergent/`, migrating off the CRA/CRACO scaffold (SSR), or required-PR branch protection (which blocks Emergent's direct pushes). The test is *"does this break Emergent's ability to keep working here?"* — **not** *"does Emergent touch this file?"* By that test, deleting/refactoring frontend files Emergent regenerates is ⚙️ (do it via Emergent), and removing an **unused** backend dep — even the Emergent-branded `emergentintegrations`, which `server.py` never imports — is 🟢/⚙️, not 🔒. **Do not do 🔒 items while Emergent is primary.**
 - **Graduation prerequisite:** before any 🔒 item, cut Emergent's write access to the repo so it stops auto-committing — otherwise removals aren't durable.
 
 ### Shipped status
@@ -49,9 +49,9 @@ The team will graduate off Emergent **eventually**, but keeps it as the **primar
 | **0 — Security** | ✅ done (live on `main`) | 🟢 (backend) | Backend-only **except** the honeypot's hidden field in `Contact.js` (⚙️ frontend — Emergent could strip it on a re-scaffold); `SEC-11` (verify Resend domain) still open |
 | **1 — Slice 1 · DevEx** | ✅ done (on `develop`) | 🟢 | CI non-blocking; branch protection 🔒 |
 | **1 — Slice 2 · De-Emergent** | ✅ done (on `develop`) | ⚙️ | Emergent may re-inject — watch for churn |
-| **1 — Slice 3 · SEO foundation** | ⬜ todo | ⚙️ / 🔒 | 🟢 subset = `robots.txt` + `sitemap.xml` **only** (new `public/` files Emergent doesn't manage); the `manifest.json` `<link>` + JSON-LD `<script>` inject into Emergent-managed `index.html` → ⚙️; SSR/helmet/OG = via-Emergent or graduation |
+| **1 — Slice 3 · SEO foundation** | ⬜ todo | ⚙️ / 🔒 | 🟢 subset = `robots.txt` + `sitemap.xml` **only** (new `frontend/public/` files Emergent doesn't manage); the `manifest.json` `<link>` + JSON-LD `<script>` inject into Emergent-managed `index.html` → ⚙️; SSR/helmet/OG = via-Emergent or graduation |
 | **2 — Accessibility** | ⬜ todo | ⚙️ | frontend-heavy → do via Emergent |
-| **3 — Architecture / deps** | ⬜ todo | mixed | `SEC-6`–`9` 🟢 backend; `FE-1` (delete dead UI) = ⚙️ — do it *via* Emergent since it owns the frontend build (no linkage severed); only `SEC-10` (drops `emergentintegrations`) is 🔒 |
+| **3 — Architecture / deps** | ⬜ todo | 🟢 / ⚙️ | `SEC-6`–`10` = 🟢 backend (`SEC-10` removes unused deps incl. `emergentintegrations`, which `server.py` never imports — severs no linkage; Emergent may re-add, so make it durable via Emergent ⚙️); `FE-1` (delete dead UI) = ⚙️. No 🔒 items here. |
 | **4 — Performance / media** | 🟡 partial | ⚙️ | `PERF-3` partly done in #7 (photos); rest frontend |
 | **5 — Testing & gates** | ⬜ todo | 🟢 | **best Emergent-safe lane to pick up next** |
 | **6 — Content & hygiene** | ⬜ todo | ⚙️ / 🔒 | content via Emergent; `DX-11` is 🔒 |
@@ -230,14 +230,15 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
 
 #### SEO-6 · Add robots.txt, sitemap.xml, manifest.json, JSON-LD `P1` `M`
 - **Files:** `frontend/public/`
-- **Problem:** `public/` contains only `index.html`. No crawl directives, no
+- **Problem:** `frontend/public/` contains only `index.html`. No crawl directives, no
   sitemap, no PWA manifest, no structured data.
 - **Steps:** add `robots.txt` (allow + `Sitemap:` line); generate `sitemap.xml`
   for `/` and each case-study slug; add `manifest.json` + `<link rel="manifest">`;
   inject a JSON-LD `Organization` block (name, url, logo, `sameAs` GitHub/LinkedIn, contactPoint).
-- **Lane:** split — 🟢 `robots.txt` + `sitemap.xml` are new `public/` files Emergent
-  doesn't manage (safe hand-PR). The `<link rel="manifest">` and JSON-LD `<script>` go
-  into the Emergent-managed `index.html`, so those two edits are ⚙️ (do via Emergent).
+- **Lane:** split — 🟢 `robots.txt` + `sitemap.xml` are new `frontend/public/` files
+  Emergent doesn't manage (safe hand-PR). The `<link rel="manifest">` and JSON-LD
+  `<script>` go into the Emergent-managed `frontend/public/index.html`, so those two edits
+  are ⚙️ (do via Emergent).
 
 ### DevEx foundation
 
@@ -391,6 +392,12 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
   client), `black`/`flake8`/`mypy`/`isort` to `dev-requirements.txt`. Drop
   `python-multipart` — the API takes only JSON (no `Form`/`File`), so nothing needs it
   until a multipart endpoint is added.
+- **Lane:** 🟢/⚙️ — every dep here is **unused** (`server.py` imports none of them,
+  including the Emergent-branded `emergentintegrations`), so removing them severs no
+  linkage and touches nothing in Emergent's write model → safe as a hand-PR (🟢). Caveat:
+  Emergent may re-add its own deps on a future backend scaffold, so running the slim
+  *through* Emergent (⚙️) makes the removal durable. **Not 🔒** — it doesn't break
+  Emergent's ability to keep working here.
 - **Done when:** prod image installs only what runs; app boots; tests pass.
 
 ### FE-2 · Remove the non-functional Tailwind token layer `P2` `S`
@@ -670,9 +677,9 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
 - [ ] A11Y-12 Name scroll-indicator button
 - [ ] A11Y-15 Trim alt text
 
-**Phase 3 — Architecture & Dependency Cleanup** — ⬜ todo (`SEC-6`–`9` 🟢 backend · `FE-1` ⚙️ · `SEC-10` 🔒)
+**Phase 3 — Architecture & Dependency Cleanup** — ⬜ todo (`SEC-6`–`10` 🟢 backend · `FE-1` ⚙️)
 - [ ] FE-1 Delete dead shadcn UI + purge deps  ⚙️ _(via Emergent — frontend build)_
-- [ ] SEC-10 Slim backend deps  🔒 _(drops `emergentintegrations`)_
+- [ ] SEC-10 Slim backend deps  🟢/⚙️ _(all unused incl. `emergentintegrations`; Emergent may re-add → make durable via Emergent)_
 - [ ] FE-2 Remove vestigial Tailwind tokens
 - [ ] FE-3 Shared API client
 - [ ] FE-4 404 route
@@ -721,7 +728,7 @@ Keep PRs small and reviewable. A natural sequence:
 
 1. **`security/critical-hardening`** — SEC-1–5. ✅ **shipped, live on `main`** (`SEC-11` still open).
 2. **`chore/de-emergent`** — SEO-4/5/7/8 + `PERF-6a`. ✅ **merged to `develop` (#7)** — awaiting promotion.
-3. **`chore/dep-purge`** — FE-1 (frontend `ui/` delete) is ⚙️ → do via Emergent; SEC-10 (backend requirements, drops `emergentintegrations`) is 🔒 → hold for graduation. Split these rather than shipping as one PR.
+3. **`chore/dep-purge`** — FE-1 (frontend `ui/` delete) is ⚙️ → do via Emergent; SEC-10 (backend requirements, incl. the unused `emergentintegrations`) is 🟢 → safe hand-PR, though Emergent may re-add its own deps, so running it *through* Emergent makes the removal durable. Ship together or split.
 4. **`feat/seo-foundation`** — SEO-1/2/3/6 (prerender + helmet + OG + robots/sitemap/JSON-LD). ⚙️/🔒 mostly.
 5. **`chore/devex-foundation`** — DX-1/2/3/4. ✅ **merged to `develop` (#6)** (branch protection deferred — Emergent).
 6. **`a11y/baseline`** — A11Y-1–15 (can split motion+focus+contrast from the rest).
