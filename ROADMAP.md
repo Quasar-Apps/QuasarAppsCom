@@ -9,10 +9,52 @@ It captures **every** finding, grouped into sequenced phases with concrete steps
 affected files, and acceptance criteria so the work can be picked up and shipped
 incrementally.
 
-> **Status:** proposed. Nothing here is implemented yet (the only review items
-> already shipped are the PR&nbsp;#2 fixes: list-endpoint sort, test skip-guard,
-> uuid test ids, junk-file removal, repo-relative report paths — these are
-> intentionally excluded below).
+> **Status:** in progress. See [Status & Operating Model](#status--operating-model)
+> for what's shipped, what's on `develop` awaiting promotion, the operating model
+> (Emergent stays the primary builder for now), and the standing-out watchlist.
+
+---
+
+## Status & Operating Model
+
+_Last updated: 2026-07-02._
+
+### Operating model — Emergent stays primary (for now)
+The team will graduate off Emergent **eventually**, but keeps it as the **primary builder for now**. This is the dominant planning constraint:
+
+- Emergent auto-commits to `develop`/`main` (as `emergent-agent-e1`) and manages the frontend build, `frontend/public/index.html`, and scaffold. **Hand-PRs that touch Emergent-managed files can be silently reverted** on Emergent's next session (badge/telemetry/visual-edits/CDN assets especially).
+- Work is therefore tagged by **lane**:
+  - 🟢 **Emergent-safe** — new/infra files Emergent doesn't manage (CI, docs, tests, `frontend/public/*.txt`) and backend-only logic → fine as hand-PRs.
+  - ⚙️ **Do-via-Emergent** — frontend/UX/content → make the change *through* Emergent's agent so it sticks.
+  - 🔒 **Gated on graduation** — only changes that **sever Emergent's linkage or block its write model**: untracking `.emergent/`, migrating off the CRA/CRACO scaffold (SSR), or required-PR branch protection (which blocks Emergent's direct pushes). The test is *"does this break Emergent's ability to keep working here?"* — **not** *"does Emergent touch this file?"* By that test, deleting/refactoring frontend files Emergent regenerates is ⚙️ (do it via Emergent), and removing an **unused** backend dep — even the Emergent-branded `emergentintegrations`, which `backend/server.py` never imports — is 🟢/⚙️, not 🔒. **Do not do 🔒 items while Emergent is primary.**
+- **Graduation prerequisite:** before any 🔒 item, cut Emergent's write access to the repo so it stops auto-committing — otherwise removals aren't durable.
+
+### Shipped status
+- **Live on `main` (production):** Phase 0 security (SEC-1–5) + this roadmap.
+- **On `develop`, awaiting a `develop → main` promotion:** Phase 1 Slice 1 (DevEx: CI, READMEs, `.env.example` — #6) and Slice 2 (De-Emergent: SEO-4/5/7/8 — #7). ⚠️ Includes the founder-photo EXIF/GPS fix — **not live until promoted**.
+
+### ⚠️ Standing-out watchlist (independent of phase order)
+1. **Founder-photo GPS/EXIF** is still public on the deployed site until the promotion lands (and Emergent may re-point it to its CDN). Interim fix: replace the image inside Emergent.
+2. **No Privacy Policy** though the contact form collects PII (Footer Privacy/Terms are dead `href="#"`) → see `SEO-15`. Compliance/trust gap.
+3. **Deploy-time security caveats:** run uvicorn with `--proxy-headers --forwarded-allow-ips=<proxy>` so the rate-limiter keys per client; set `CORS_ORIGINS` to the real origin; verify the Resend domain (`SEC-11`).
+4. **Analytics removed** (the PostHog snippet was Emergent's telemetry) — add your own if you want product analytics.
+5. **CI is not enforced** — required-status-check branch protection is 🔒 (it would block Emergent's direct pushes).
+
+### Legend
+`✅ done · 🟡 partial · ⬜ todo` — lanes: `🟢 Emergent-safe · ⚙️ via-Emergent · 🔒 gated on graduation`
+
+### Phase status
+| Phase | Status | Lane | Notes |
+|------:|--------|------|-------|
+| **0 — Security** | ✅ done (live on `main`) | 🟢 (backend) | Backend-only **except** the honeypot's hidden field in `frontend/src/components/Contact.js` (⚙️ frontend — Emergent could strip it on a re-scaffold); `SEC-11` (verify Resend domain) still open |
+| **1 — Slice 1 · DevEx** | ✅ done (on `develop`) | 🟢 | CI non-blocking; branch protection 🔒 |
+| **1 — Slice 2 · De-Emergent** | ✅ done (on `develop`) | ⚙️ | Emergent may re-inject — watch for churn |
+| **1 — Slice 3 · SEO foundation** | ⬜ todo | ⚙️ / 🔒 | 🟢 subset = `robots.txt` + `sitemap.xml` **only** (new `frontend/public/` files Emergent doesn't manage); the `manifest.json` `<link>` + JSON-LD `<script>` inject into Emergent-managed `frontend/public/index.html` → ⚙️; SSR/helmet/OG = via-Emergent or graduation |
+| **2 — Accessibility** | ⬜ todo | ⚙️ | frontend-heavy → do via Emergent |
+| **3 — Architecture / deps** | ⬜ todo | 🟢 / ⚙️ | `SEC-6`–`10` = 🟢 backend (`SEC-10` removes unused deps incl. `emergentintegrations`, which `backend/server.py` never imports — severs no linkage; Emergent may re-add, so make it durable via Emergent ⚙️); `FE-1` (delete dead UI) = ⚙️. No 🔒 items here. |
+| **4 — Performance / media** | 🟡 partial | ⚙️ | `PERF-3` partly done in #7 (photos); rest frontend |
+| **5 — Testing & gates** | ⬜ todo | 🟢 | **best Emergent-safe lane to pick up next** |
+| **6 — Content & hygiene** | ⬜ todo | ⚙️ / 🔒 | content via Emergent; `DX-11` is 🔒 |
 
 ---
 
@@ -130,7 +172,7 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
   remove or re-home the PostHog snippet behind the company's own managed analytics config.
 
 #### SEO-4 · Self-host the favicon and logo `P1` `S`
-- **Files:** `frontend/public/index.html`, `Navigation.js`, `Footer.js`, `Hero.js`
+- **Files:** `frontend/public/index.html`, `frontend/src/components/Navigation.js`, `frontend/src/components/Footer.js`, `frontend/src/components/Hero.js`
 - **Problem:** favicon/apple-touch-icon and the in-app logo hot-link to
   `customer-assets.emergentagent.com/job_…` — breaks if Emergent rotates the path.
 - **Steps:** download the logo, commit to `frontend/public/` (`favicon.ico`,
@@ -188,11 +230,16 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
 
 #### SEO-6 · Add robots.txt, sitemap.xml, manifest.json, JSON-LD `P1` `M`
 - **Files:** `frontend/public/`
-- **Problem:** `public/` contains only `index.html`. No crawl directives, no
-  sitemap, no PWA manifest, no structured data.
+- **Problem:** `frontend/public/` has `index.html` plus the self-hosted assets added in
+  #7 (`favicon.ico`, `logo.png`, `team/`), but **no** crawl directives, sitemap, PWA
+  manifest, or structured data — no `robots.txt`, `sitemap.xml`, `manifest.json`, or JSON-LD.
 - **Steps:** add `robots.txt` (allow + `Sitemap:` line); generate `sitemap.xml`
   for `/` and each case-study slug; add `manifest.json` + `<link rel="manifest">`;
   inject a JSON-LD `Organization` block (name, url, logo, `sameAs` GitHub/LinkedIn, contactPoint).
+- **Lane:** split — 🟢 `robots.txt` + `sitemap.xml` are new `frontend/public/` files
+  Emergent doesn't manage (safe hand-PR). The `<link rel="manifest">` and JSON-LD
+  `<script>` go into the Emergent-managed `frontend/public/index.html`, so those two edits
+  are ⚙️ (do via Emergent).
 
 ### DevEx foundation
 
@@ -214,7 +261,7 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
 
 #### DX-3 · `.env.example` files `P1` `S`
 - **Files:** new `backend/.env.example`, `frontend/.env.example`
-- **Problem:** `server.py` hard-crashes on missing `MONGO_URL`/`DB_NAME`; required
+- **Problem:** `backend/server.py` hard-crashes on missing `MONGO_URL`/`DB_NAME`; required
   vars live only as prose in `memory/PRD.md`.
 - **Steps:** document every key with safe defaults/comments — backend
   (`MONGO_URL`, `DB_NAME`, `RESEND_API_KEY`, `CONTACT_EMAIL`, `CORS_ORIGINS`,
@@ -235,7 +282,7 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
 > contrast) are highest-leverage.
 
 ### A11Y-1 · Respect `prefers-reduced-motion` `P0` `S`
-- **Files:** `src/index.css`, `Hero.js` (+ any infinite Framer loops)
+- **Files:** `frontend/src/index.css`, `frontend/src/components/Hero.js` (+ any infinite Framer loops)
 - **Problem:** No reduced-motion handling across a very animation-heavy UI
   (infinite floating logo/chevron loops, scroll reveals, smooth scroll).
 - **Steps:** add a global `@media (prefers-reduced-motion: reduce)` block neutralizing
@@ -243,7 +290,7 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
   `useReducedMotion()`.
 
 ### A11Y-2 · Visible focus indicators on custom controls `P0` `S`
-- **Files:** `src/index.css` (`.btn-primary`, `.btn-secondary`, `.nav-link`,
+- **Files:** `frontend/src/index.css` (`.btn-primary`, `.btn-secondary`, `.nav-link`,
   `.glass-card`/`.case-study-glass`/`.team-glass-card`)
 - **Problem:** Custom button/card/link classes define `:hover` but no
   `:focus`/`:focus-visible`; keyboard users can't see focus.
@@ -251,7 +298,7 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
   outline-offset: 3px` or a magenta `box-shadow` ring) to all interactive classes.
 
 ### A11Y-3 · Fix tertiary-grey contrast failure `P1` `S`
-- **Files:** `src/index.css` (`--text-tertiary: #68647D`)
+- **Files:** `frontend/src/index.css` (`--text-tertiary: #68647D`)
 - **Problem:** `#68647D` on `#050211` ≈ 3.62:1 — fails AA (4.5:1) for the small
   labels/links/placeholder it's used on.
 - **Steps:** lighten to ~`#8B879E` (≈5.9:1 — comfortably clears AA), or restrict the
@@ -265,19 +312,19 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
   eyebrow labels to large-text size; keep the original colors for icons/decoration.
 
 ### A11Y-5 · Skip-to-content link + `<main>` landmark `P1` `S`
-- **Files:** `HomePage.js`, `CaseStudyPage.js`
+- **Files:** `frontend/src/pages/HomePage.js`, `frontend/src/pages/CaseStudyPage.js`
 - **Steps:** add a visually-hidden, focus-visible "Skip to content" anchor as the
   first focusable element; wrap page content in `<main id="main-content">`.
 
 ### A11Y-6 / A11Y-7 · Section labelling `P1` `S`
-- **Files:** all section components, `CaseStudyPage.js`
+- **Files:** all section components, `frontend/src/pages/CaseStudyPage.js`
 - **Problem:** `<section>`s have `id`s but no accessible name, so they aren't exposed
   as landmarks; eyebrow label is announced disconnected from its `<h2>`.
 - **Steps:** add `aria-labelledby` pointing at each section heading (or `aria-label`
   where there is no visible heading, e.g. GitHubCallout).
 
 ### A11Y-13 · Accessible mobile menu `P2` `M`
-- **Files:** `Navigation.js`
+- **Files:** `frontend/src/components/Navigation.js`
 - **Problem:** Hamburger toggle has no `aria-label`/`aria-expanded`/`aria-controls`;
   the open overlay is not a focus-trapped dialog and doesn't close on `Escape`.
 - **Steps:** add `aria-label`/`aria-expanded`/`aria-controls`; make the overlay
@@ -285,22 +332,22 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
   close, close on `Escape`.
 
 ### A11Y-14 · Focus management on route change `P2` `S`
-- **Files:** `App.js`, `pages/*.js`
+- **Files:** `frontend/src/App.js`, `frontend/src/pages/*.js`
 - **Steps:** on navigation, move focus to the page `<h1>` (`tabIndex={-1}`) or a
   visually-hidden `role="status"` route announcer.
 
 ### A11Y-8 / A11Y-9 / A11Y-10 · Accessible contact form feedback `P2` `M`
-- **Files:** `Contact.js`
+- **Files:** `frontend/src/components/Contact.js`
 - **Steps:** add inline `role="status"`/`role="alert"` messaging tied to the form;
   `aria-hidden` the required `*` and add a legend; add `aria-invalid` +
   `aria-describedby` field errors and move focus to the first invalid field.
 
 ### A11Y-12 · Name the scroll-indicator button `P2` `S`
-- **Files:** `Hero.js`
+- **Files:** `frontend/src/components/Hero.js`
 - **Steps:** add `aria-label="Scroll to services"` to the icon-only button.
 
 ### A11Y-15 · Trim verbose alt text `P3` `S`
-- **Files:** `Testimonials.js`, `CaseStudies.js`, `Team.js`, `CaseStudyPage.js`
+- **Files:** `frontend/src/components/Testimonials.js`, `frontend/src/components/CaseStudies.js`, `frontend/src/components/Team.js`, `frontend/src/pages/CaseStudyPage.js`
 - **Steps:** drop redundant "photo"/"image"/"thumbnail" suffixes from alt text.
 
 > Notes on deferred a11y items:
@@ -328,11 +375,14 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
   `react-router-dom`, `framer-motion`, `lucide-react`, `axios`, `sonner`. (`clsx` and
   `tailwind-merge` are imported **only** by the deleted `utils.js`, so they go too.)
   Re-lock and verify `yarn build`.
+- **Lane:** ⚙️ **do via Emergent** — this only deletes/prunes frontend files Emergent
+  regenerates; it severs no linkage, so a hand-PR risks being reverted on Emergent's
+  next scaffold. Not 🔒.
 - **Done when:** build passes with the trimmed dependency list.
 
 ### SEC-10 / PERF-1 · Slim the backend dependencies `P1` `S`
 - **Files:** `backend/requirements.txt`, new `backend/dev-requirements.txt`
-- **Problem:** `server.py` imports only FastAPI/Starlette/motor/pydantic/dotenv/resend,
+- **Problem:** `backend/server.py` imports only FastAPI/Starlette/motor/pydantic/dotenv/resend,
   yet requirements pin `openai`, `litellm`, `google-genai`, `boto3`, `pandas`, `numpy`,
   `stripe`, `huggingface_hub`, `emergentintegrations`, unused auth libs
   (`python-jose`, `PyJWT`, `passlib`, `ecdsa`), etc. (~600MB–1GB; large CVE surface).
@@ -343,6 +393,12 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
   client), `black`/`flake8`/`mypy`/`isort` to `dev-requirements.txt`. Drop
   `python-multipart` — the API takes only JSON (no `Form`/`File`), so nothing needs it
   until a multipart endpoint is added.
+- **Lane:** 🟢/⚙️ — every dep here is **unused** (`backend/server.py` imports none of them,
+  including the Emergent-branded `emergentintegrations`), so removing them severs no
+  linkage and touches nothing in Emergent's write model → safe as a hand-PR (🟢). Caveat:
+  Emergent may re-add its own deps on a future backend scaffold, so running the slim
+  *through* Emergent (⚙️) makes the removal durable. **Not 🔒** — it doesn't break
+  Emergent's ability to keep working here.
 - **Done when:** prod image installs only what runs; app boots; tests pass.
 
 ### FE-2 · Remove the non-functional Tailwind token layer `P2` `S`
@@ -358,7 +414,7 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
   Leave `--radius` and the `borderRadius` scale alone. Don't keep the half-state.
 
 ### FE-3 · Shared API client `P1` `S`
-- **Files:** new `frontend/src/lib/api.js`; `Contact.js`, `CaseStudies.js`, `CaseStudyPage.js`
+- **Files:** new `frontend/src/lib/api.js`; `frontend/src/components/Contact.js`, `frontend/src/components/CaseStudies.js`, `frontend/src/pages/CaseStudyPage.js`
 - **Problem:** The `BACKEND_URL`/`API` constant + bare `axios` calls are duplicated
   across three files (no base instance, timeout, or shared error handling).
 - **Steps:** create `api.js` exporting an `axios.create({ baseURL, timeout })` instance
@@ -377,7 +433,7 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
   (`getDerivedStateFromError`) rendering a branded fallback.
 
 ### FE-6 · Robust data fetching `P1` `S`
-- **Files:** `CaseStudies.js`, `CaseStudyPage.js`
+- **Files:** `frontend/src/components/CaseStudies.js`, `frontend/src/pages/CaseStudyPage.js`
 - **Problem:** `useEffect` fetches have no abort/cleanup (state-set after unmount,
   races on slug change); `CaseStudies.js` swallows errors to an empty list; the same
   `/case-studies` is fetched twice with no cache.
@@ -385,15 +441,15 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
   consider a lightweight cache or `@tanstack/react-query` if fetching grows.
 
 ### FE-7 · Extract hardcoded content to data modules `P2` `S`
-- **Files:** `Team.js`, `Services.js`, `Testimonials.js`, `About.js`,
-  `Navigation.js`, `Footer.js` → new `frontend/src/data/`
+- **Files:** `frontend/src/components/Team.js`, `frontend/src/components/Services.js`, `frontend/src/components/Testimonials.js`, `frontend/src/components/About.js`,
+  `frontend/src/components/Navigation.js`, `frontend/src/components/Footer.js` → new `frontend/src/data/`
 - **Problem:** Team/services/testimonials/stats/nav data are inline arrays; the
   founder records + image URLs are duplicated between `Team.js` and `Testimonials.js`.
 - **Steps:** move to `src/data/*.js` (or fetch from the backend like case studies);
   de-duplicate founders into one source consumed by both.
 
 ### FE-8 · Decide the form strategy `P2` `S` _(coupled to FE-1)_
-- **Files:** `Contact.js`
+- **Files:** `frontend/src/components/Contact.js`
 - **Problem:** Manual `useState` form with no inline validation. `react-hook-form` is
   imported only by the dead `ui/form.jsx`; `zod`/`@hookform/resolvers` are imported
   nowhere — so they're *effectively* unused, but note the coupling: choosing the
@@ -403,7 +459,7 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
   `react-hook-form`+`zod` with a schema and field-level errors and retain them in `package.json`.
 
 ### FE-9 · Remove the dead toast system `P3` `S`
-- **Files:** `frontend/src/hooks/use-toast.js`, `Contact.js`, `App.js`
+- **Files:** `frontend/src/hooks/use-toast.js`, `frontend/src/components/Contact.js`, `frontend/src/App.js`
 - **Problem:** `use-toast.js` (the shadcn toast hook) is imported only by the dead
   `ui/` tree; the app actually uses `sonner` directly (`App.js` `Toaster`, `Contact.js`
   `toast`). Two parallel toast systems is confusing.
@@ -415,7 +471,7 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
   optionally lazy-load below-the-fold home sections.
 
 ### FE-11 · Remove dead CSS and consolidate `P3` `S`
-- **Files:** `src/App.css`, `src/index.css`
+- **Files:** `frontend/src/App.css`, `frontend/src/index.css`
 - **Problem:** ~half of `App.css` is unused (`.animated-border`, `.team-member*`,
   `.case-study-card`, `.testimonial-card`, `.marquee-container`, `.mobile-menu-enter`
   + their keyframes); the index/App split is arbitrary.
@@ -423,7 +479,7 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
   `App.css` + its import.
 
 ### FE-12 · Minor React anti-patterns `P3` `S`
-- **Files:** `CaseStudyPage.js`, `Contact.js`, `CaseStudies.js`, `Navigation.js`
+- **Files:** `frontend/src/pages/CaseStudyPage.js`, `frontend/src/components/Contact.js`, `frontend/src/components/CaseStudies.js`, `frontend/src/components/Navigation.js`
 - **Steps:** prefer stable keys over array indices where data has ids; route
   `console.error` to a logger (or strip in prod); replace `window.location.href`
   in-app navigation with `navigate()` + post-nav `scrollIntoView`.
@@ -459,8 +515,8 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
 ## Phase 4 — Performance & Media
 
 ### PERF-3 · Optimize & right-size imagery `P1` `M`
-- **Files:** `backend/server.py` (`CASE_STUDIES` image URLs), `CaseStudyPage.js`,
-  `CaseStudies.js`, `Team.js`, `Testimonials.js`
+- **Files:** `backend/server.py` (`CASE_STUDIES` image URLs), `frontend/src/pages/CaseStudyPage.js`,
+  `frontend/src/components/CaseStudies.js`, `frontend/src/components/Team.js`, `frontend/src/components/Testimonials.js`
 - **Problem:** The case-study **hero** (the LCP element) is an unresized multi-MB
   Unsplash URL with no width param; team/testimonial photos are full-size for small
   displays; no `srcset`/WebP/CDN resize.
@@ -482,7 +538,7 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
   (e.g. Outfit 400/600/700, IBM Plex 400/500); keep `display=swap`.
 
 ### PERF-7 · Tame always-on animation/blur cost `P3` `S`
-- **Files:** `Hero.js`, `src/index.css`
+- **Files:** `frontend/src/components/Hero.js`, `frontend/src/index.css`
 - **Problem:** Multiple infinite Framer loops + several `blur(100–150px)` orbs +
   pervasive `backdrop-filter: blur(30–40px)` cause continuous compositing work
   (hurts INP/battery on low-end devices).
@@ -542,14 +598,14 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
 ## Phase 6 — Content & Hygiene Polish
 
 ### SEO-9 · Reconcile location vs phone `P2` `S`
-- **Files:** `Contact.js` (location `:95` + phone `:85`), `Footer.js` (phone only, `:106`/`:109`)
+- **Files:** `frontend/src/components/Contact.js` (location `:95` + phone `:85`), `frontend/src/components/Footer.js` (phone only, `:106`/`:109`)
 - **Problem:** `Contact.js` pairs "San Francisco, CA" with a `(602)` (Phoenix, AZ) phone
   number. `Footer.js` carries the same phone but **no** location string.
 - **Steps:** in `Contact.js`, set the real operating location (or drop the line if remote)
   so location/phone agree; in `Footer.js` only the phone needs to match.
 
 ### SEO-10 · Verify outbound claims `P2` `S`
-- **Files:** `GitHubCallout.js`, `backend/server.py` (myCSA results/testimonial), `Services.js`
+- **Files:** `frontend/src/components/GitHubCallout.js`, `backend/server.py` (myCSA results/testimonial), `frontend/src/components/Services.js`
 - **Steps:** confirm the `github.com/QuasarApps` org/repos exist & are public; verify
   the myCSA case-study metrics/testimonial are accurate; soften unbacked service claims
   (e.g. "Enterprise-grade security").
@@ -560,7 +616,7 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
   screenshots hosted on the company's own domain (also improves OG previews / image SEO).
 
 ### SEO-15 / A11Y-11 · Real Privacy/Terms pages `P2` `S`
-- **Files:** `Footer.js` + new routes/pages
+- **Files:** `frontend/src/components/Footer.js` + new routes/pages
 - **Problem:** Privacy/Terms are dead `href="#"` — and the site collects PII, so a
   privacy policy is a genuine compliance/trust gap.
 - **Steps:** add real Privacy/Terms pages (and routes), or remove the links until they exist.
@@ -587,29 +643,29 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
 
 ## Master checklist
 
-**Phase 0 — Critical Security**
-- [ ] SEC-1 Lock down `GET /api/contact` (PII)
-- [ ] SEC-2 Remove/auth `/status`
-- [ ] SEC-3 Fix CORS credentials + wildcard
-- [ ] SEC-4 Rate-limit + de-abuse contact POST
-- [ ] SEC-5 Input length / payload-size limits
-- [ ] SEC-11 Verify Resend domain
+**Phase 0 — Critical Security** — ✅ shipped, live on `main`
+- [x] SEC-1 Lock down `GET /api/contact` (PII)
+- [x] SEC-2 Remove/auth `/status`
+- [x] SEC-3 Fix CORS credentials + wildcard  _(origins still `*` — pin in prod)_
+- [x] SEC-4 Rate-limit + de-abuse contact POST  _(needs uvicorn `--proxy-headers` at deploy)_
+- [x] SEC-5 Input length / payload-size limits
+- [ ] SEC-11 Verify Resend domain  _(operational)_
 
-**Phase 1 — Production Hardening & De-Emergent**
-- [ ] SEO-5 Remove Emergent badge/script/PostHog
-- [ ] SEO-4 Self-host favicon/logo
-- [ ] SEO-7 Drop Inter font
-- [ ] SEO-8 Fix theme-color
-- [ ] SEO-1 SSR/prerender
-- [ ] SEO-2 Per-route head metadata
-- [ ] SEO-3 OG/Twitter tags
-- [ ] SEO-6 robots/sitemap/manifest/JSON-LD
-- [ ] DX-1 CI + branch protection
-- [ ] DX-2 Real README
-- [ ] DX-3 `.env.example`
-- [ ] DX-4 Frontend README
+**Phase 1 — Production Hardening & De-Emergent** — 🟡 slices 1–2 on `develop` (awaiting promotion); slice 3 todo
+- [x] SEO-5 Remove Emergent badge/script/PostHog
+- [x] SEO-4 Self-host favicon/logo (+ founder photos)
+- [x] SEO-7 Drop Inter font
+- [x] SEO-8 Fix theme-color
+- [ ] SEO-1 SSR/prerender  🔒/⚙️
+- [ ] SEO-2 Per-route head metadata  ⚙️
+- [ ] SEO-3 OG/Twitter tags  ⚙️
+- [ ] SEO-6 robots/sitemap/manifest/JSON-LD  🟢 `robots.txt`+`sitemap.xml` only · ⚙️ manifest+JSON-LD (in `frontend/public/index.html`)
+- [x] DX-1 CI  _(branch protection 🔒 on hold — Emergent pushes directly)_
+- [x] DX-2 Real README
+- [x] DX-3 `.env.example`
+- [x] DX-4 Frontend README
 
-**Phase 2 — Accessibility**
+**Phase 2 — Accessibility** — ⬜ todo (⚙️ via Emergent)
 - [ ] A11Y-1 prefers-reduced-motion
 - [ ] A11Y-2 Focus indicators
 - [ ] A11Y-3 Tertiary-grey contrast
@@ -622,9 +678,9 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
 - [ ] A11Y-12 Name scroll-indicator button
 - [ ] A11Y-15 Trim alt text
 
-**Phase 3 — Architecture & Dependency Cleanup**
-- [ ] FE-1 Delete dead shadcn UI + purge deps
-- [ ] SEC-10 Slim backend deps
+**Phase 3 — Architecture & Dependency Cleanup** — ⬜ todo (`SEC-6`–`10` 🟢 backend · `FE-1` ⚙️)
+- [ ] FE-1 Delete dead shadcn UI + purge deps  ⚙️ _(via Emergent — frontend build)_
+- [ ] SEC-10 Slim backend deps  🟢/⚙️ _(all unused incl. `emergentintegrations`; Emergent may re-add → make durable via Emergent)_
 - [ ] FE-2 Remove vestigial Tailwind tokens
 - [ ] FE-3 Shared API client
 - [ ] FE-4 404 route
@@ -641,14 +697,14 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
 - [ ] SEC-8 Narrow email except
 - [ ] SEC-9 Stop logging PII
 
-**Phase 4 — Performance & Media**
-- [ ] PERF-3 Optimize imagery
+**Phase 4 — Performance & Media** — 🟡 partial (⚙️ via Emergent)
+- [ ] PERF-3 Optimize imagery  🟡 _(photos self-hosted/resized/EXIF-stripped in #7; WebP/srcset remain)_
 - [ ] PERF-4 Image width/height (CLS)
 - [ ] PERF-6 Trim/speed fonts
 - [ ] PERF-7 Tame animation/blur
 
-**Phase 5 — Testing & Quality Gates**
-- [ ] TEST-1 Hermetic backend tests
+**Phase 5 — Testing & Quality Gates** — ⬜ todo (🟢 best Emergent-safe lane next)
+- [ ] TEST-1 Hermetic backend tests  _(also closes the 2 open PR #2 threads)_
 - [ ] DX-5 Remove duplicate test script
 - [ ] DX-6 Frontend tests + coverage
 - [ ] DX-7 Backend lint/type config
@@ -656,7 +712,7 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
 - [ ] DX-9 Pre-commit
 - [ ] DX-10 docker-compose / Makefile
 
-**Phase 6 — Content & Hygiene Polish**
+**Phase 6 — Content & Hygiene Polish** — ⬜ todo (⚙️ content via Emergent · `DX-11` 🔒)
 - [ ] SEO-9 Location/phone consistency
 - [ ] SEO-10 Verify outbound claims
 - [ ] SEO-11 Real case-study screenshots
@@ -671,11 +727,11 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
 
 Keep PRs small and reviewable. A natural sequence:
 
-1. **`security/critical-hardening`** — SEC-1–5 (+SEC-11 note). *Ship first.*
-2. **`chore/de-emergent`** — SEO-4/5/7/8 + `PERF-6a` (badge/scripts/Inter-font/favicon/theme-color).
-3. **`chore/dep-purge`** — FE-1 + SEC-10 (frontend `ui/` delete + backend requirements).
-4. **`feat/seo-foundation`** — SEO-1/2/3/6 (prerender + helmet + OG + robots/sitemap/JSON-LD).
-5. **`chore/devex-foundation`** — DX-1/2/3/4 (CI, READMEs, env examples).
+1. **`security/critical-hardening`** — SEC-1–5. ✅ **shipped, live on `main`** (`SEC-11` still open).
+2. **`chore/de-emergent`** — SEO-4/5/7/8 + `PERF-6a`. ✅ **merged to `develop` (#7)** — awaiting promotion.
+3. **`chore/dep-purge`** — FE-1 (frontend `ui/` delete) is ⚙️ → do via Emergent; SEC-10 (backend requirements, incl. the unused `emergentintegrations`) is 🟢 → safe hand-PR, though Emergent may re-add its own deps, so running it *through* Emergent makes the removal durable. Ship together or split.
+4. **`feat/seo-foundation`** — SEO-1/2/3/6 (prerender + helmet + OG + robots/sitemap/JSON-LD). ⚙️/🔒 mostly.
+5. **`chore/devex-foundation`** — DX-1/2/3/4. ✅ **merged to `develop` (#6)** (branch protection deferred — Emergent).
 6. **`a11y/baseline`** — A11Y-1–15 (can split motion+focus+contrast from the rest).
 7. **`refactor/frontend-architecture`** — FE-2–12.
 8. **`refactor/backend-modernization`** — SEC-6–9.
