@@ -1,0 +1,75 @@
+name: CI
+
+# Quality gate for the develop -> main flow. Keep this green before merging.
+#
+# IMPORTANT: a workflow only RUNS checks — it does not BLOCK merges. To make the gate
+# real, configure branch protection / a ruleset on `main` (and `develop`) in repo
+# Settings to require the "Frontend build" and "Backend checks" status checks to pass
+# before merging. That is a repo Settings step and can't be expressed in this file.
+#
+# Scope is intentionally a foundation (DX-1): it catches real build/compile breakage and
+# that the test suite still collects. Stricter checks land in later roadmap phases:
+#   - DX-7: flake8/black/mypy config + backend lint
+#   - DX-8: eslint flat config + Prettier (then flip the frontend build to CI=true)
+#   - TEST-1: hermetic in-process backend tests + a pinned backend/dev-requirements.txt
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+# Cancel superseded runs on rapid pushes to the same ref.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    name: Frontend build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+          cache-dependency-path: frontend/yarn.lock
+      - name: Activate pinned Yarn (Corepack)
+        # Uses the packageManager field in package.json (yarn@1.22.22) so the build
+        # doesn't depend on the runner's ambient Yarn version. Echo the version so the
+        # pin is observable in logs and fails loudly if the shim is ever shadowed.
+        run: |
+          corepack enable
+          yarn --version
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      - name: Build
+        # CI=false so pre-existing eslint *warnings* don't fail the build yet.
+        # Real compile/type errors still fail. Flip to CI=true once DX-8 lands.
+        env:
+          CI: false
+        run: yarn build
+
+  backend:
+    name: Backend checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Syntax check
+        run: python -m py_compile backend/server.py backend/tests/test_quasar_api.py
+      - name: Install test tooling
+        # Pinned dev/test deps, kept out of the runtime requirements.txt.
+        # DX-7/TEST-1 will expand backend/dev-requirements.txt (black/flake8/mypy, etc.).
+        run: python -m pip install -r backend/dev-requirements.txt
+      - name: Pytest (integration suite skips unless REACT_APP_BACKEND_URL is set)
+        run: python -m pytest backend/tests -q

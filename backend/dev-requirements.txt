@@ -1,0 +1,5 @@
+# Dev/test tooling — NOT required at runtime (keep out of requirements.txt).
+# Versions kept in sync with requirements.txt where they overlap.
+# Expanded by DX-7 (flake8/black/mypy) and TEST-1 (hermetic test deps) per ROADMAP.
+pytest==9.0.2
+requests==2.32.5
