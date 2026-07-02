@@ -9,10 +9,52 @@ It captures **every** finding, grouped into sequenced phases with concrete steps
 affected files, and acceptance criteria so the work can be picked up and shipped
 incrementally.
 
-> **Status:** proposed. Nothing here is implemented yet (the only review items
-> already shipped are the PR&nbsp;#2 fixes: list-endpoint sort, test skip-guard,
-> uuid test ids, junk-file removal, repo-relative report paths — these are
-> intentionally excluded below).
+> **Status:** in progress. See [Status & Operating Model](#status--operating-model)
+> for what's shipped, what's on `develop` awaiting promotion, the operating model
+> (Emergent stays the primary builder for now), and the standing-out watchlist.
+
+---
+
+## Status & Operating Model
+
+_Last updated: 2026-07-02._
+
+### Operating model — Emergent stays primary (for now)
+The team will graduate off Emergent **eventually**, but keeps it as the **primary builder for now**. This is the dominant planning constraint:
+
+- Emergent auto-commits to `develop`/`main` (as `emergent-agent-e1`) and manages the frontend build, `index.html`, and scaffold. **Hand-PRs that touch Emergent-managed files can be silently reverted** on Emergent's next session (badge/telemetry/visual-edits/CDN assets especially).
+- Work is therefore tagged by **lane**:
+  - 🟢 **Emergent-safe** — new/infra files Emergent doesn't manage (CI, docs, tests, `public/*.txt`) and backend-only logic → fine as hand-PRs.
+  - ⚙️ **Do-via-Emergent** — frontend/UX/content → make the change *through* Emergent's agent so it sticks.
+  - 🔒 **Gated on graduation** — anything that severs Emergent linkage (untracking `.emergent/`, dropping `emergentintegrations`, SSR migration, required-PR branch protection). **Do not do these while Emergent is primary.**
+- **Graduation prerequisite:** before any 🔒 item, cut Emergent's write access to the repo so it stops auto-committing — otherwise removals aren't durable.
+
+### Shipped status
+- **Live on `main` (production):** Phase 0 security (SEC-1–5) + this roadmap.
+- **On `develop`, awaiting a `develop → main` promotion:** Phase 1 Slice 1 (DevEx: CI, READMEs, `.env.example` — #6) and Slice 2 (De-Emergent: SEO-4/5/7/8 — #7). ⚠️ Includes the founder-photo EXIF/GPS fix — **not live until promoted**.
+
+### ⚠️ Standing-out watchlist (independent of phase order)
+1. **Founder-photo GPS/EXIF** is still public on the deployed site until the promotion lands (and Emergent may re-point it to its CDN). Interim fix: replace the image inside Emergent.
+2. **No Privacy Policy** though the contact form collects PII (Footer Privacy/Terms are dead `href="#"`) → see `SEO-15`. Compliance/trust gap.
+3. **Deploy-time security caveats:** run uvicorn with `--proxy-headers --forwarded-allow-ips=<proxy>` so the rate-limiter keys per client; set `CORS_ORIGINS` to the real origin; verify the Resend domain (`SEC-11`).
+4. **Analytics removed** (the PostHog snippet was Emergent's telemetry) — add your own if you want product analytics.
+5. **CI is not enforced** — required-status-check branch protection is 🔒 (it would block Emergent's direct pushes).
+
+### Legend
+`✅ done · 🟡 partial · ⬜ todo` — lanes: `🟢 Emergent-safe · ⚙️ via-Emergent · 🔒 gated on graduation`
+
+### Phase status
+| Phase | Status | Lane | Notes |
+|------:|--------|------|-------|
+| **0 — Security** | ✅ done (live on `main`) | 🟢 | `SEC-11` (verify Resend domain) still open |
+| **1 — Slice 1 · DevEx** | ✅ done (on `develop`) | 🟢 | CI non-blocking; branch protection 🔒 |
+| **1 — Slice 2 · De-Emergent** | ✅ done (on `develop`) | ⚙️ | Emergent may re-inject — watch for churn |
+| **1 — Slice 3 · SEO foundation** | ⬜ todo | ⚙️ / 🔒 | `robots.txt`/`sitemap.xml`/`manifest.json` = 🟢 subset; SSR/helmet/OG = via-Emergent or graduation |
+| **2 — Accessibility** | ⬜ todo | ⚙️ | frontend-heavy → do via Emergent |
+| **3 — Architecture / deps** | ⬜ todo | mixed | `SEC-6`–`9` 🟢 backend; `FE-1` & `SEC-10` fight Emergent (🔒-ish) |
+| **4 — Performance / media** | 🟡 partial | ⚙️ | `PERF-3` partly done in #7 (photos); rest frontend |
+| **5 — Testing & gates** | ⬜ todo | 🟢 | **best Emergent-safe lane to pick up next** |
+| **6 — Content & hygiene** | ⬜ todo | ⚙️ / 🔒 | content via Emergent; `DX-11` is 🔒 |
 
 ---
 
@@ -587,29 +629,29 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
 
 ## Master checklist
 
-**Phase 0 — Critical Security**
-- [ ] SEC-1 Lock down `GET /api/contact` (PII)
-- [ ] SEC-2 Remove/auth `/status`
-- [ ] SEC-3 Fix CORS credentials + wildcard
-- [ ] SEC-4 Rate-limit + de-abuse contact POST
-- [ ] SEC-5 Input length / payload-size limits
-- [ ] SEC-11 Verify Resend domain
+**Phase 0 — Critical Security** — ✅ shipped, live on `main`
+- [x] SEC-1 Lock down `GET /api/contact` (PII)
+- [x] SEC-2 Remove/auth `/status`
+- [x] SEC-3 Fix CORS credentials + wildcard  _(origins still `*` — pin in prod)_
+- [x] SEC-4 Rate-limit + de-abuse contact POST  _(needs uvicorn `--proxy-headers` at deploy)_
+- [x] SEC-5 Input length / payload-size limits
+- [ ] SEC-11 Verify Resend domain  _(operational)_
 
-**Phase 1 — Production Hardening & De-Emergent**
-- [ ] SEO-5 Remove Emergent badge/script/PostHog
-- [ ] SEO-4 Self-host favicon/logo
-- [ ] SEO-7 Drop Inter font
-- [ ] SEO-8 Fix theme-color
-- [ ] SEO-1 SSR/prerender
-- [ ] SEO-2 Per-route head metadata
-- [ ] SEO-3 OG/Twitter tags
-- [ ] SEO-6 robots/sitemap/manifest/JSON-LD
-- [ ] DX-1 CI + branch protection
-- [ ] DX-2 Real README
-- [ ] DX-3 `.env.example`
-- [ ] DX-4 Frontend README
+**Phase 1 — Production Hardening & De-Emergent** — 🟡 slices 1–2 on `develop` (awaiting promotion); slice 3 todo
+- [x] SEO-5 Remove Emergent badge/script/PostHog
+- [x] SEO-4 Self-host favicon/logo (+ founder photos)
+- [x] SEO-7 Drop Inter font
+- [x] SEO-8 Fix theme-color
+- [ ] SEO-1 SSR/prerender  🔒/⚙️
+- [ ] SEO-2 Per-route head metadata  ⚙️
+- [ ] SEO-3 OG/Twitter tags  ⚙️
+- [ ] SEO-6 robots/sitemap/manifest/JSON-LD  🟢 _(safe subset)_
+- [x] DX-1 CI  _(branch protection 🔒 on hold — Emergent pushes directly)_
+- [x] DX-2 Real README
+- [x] DX-3 `.env.example`
+- [x] DX-4 Frontend README
 
-**Phase 2 — Accessibility**
+**Phase 2 — Accessibility** — ⬜ todo (⚙️ via Emergent)
 - [ ] A11Y-1 prefers-reduced-motion
 - [ ] A11Y-2 Focus indicators
 - [ ] A11Y-3 Tertiary-grey contrast
@@ -622,7 +664,7 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
 - [ ] A11Y-12 Name scroll-indicator button
 - [ ] A11Y-15 Trim alt text
 
-**Phase 3 — Architecture & Dependency Cleanup**
+**Phase 3 — Architecture & Dependency Cleanup** — ⬜ todo (`SEC-6`–`9` 🟢 backend · `FE-1`/`SEC-10` 🔒)
 - [ ] FE-1 Delete dead shadcn UI + purge deps
 - [ ] SEC-10 Slim backend deps
 - [ ] FE-2 Remove vestigial Tailwind tokens
@@ -641,14 +683,14 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
 - [ ] SEC-8 Narrow email except
 - [ ] SEC-9 Stop logging PII
 
-**Phase 4 — Performance & Media**
-- [ ] PERF-3 Optimize imagery
+**Phase 4 — Performance & Media** — 🟡 partial (⚙️ via Emergent)
+- [ ] PERF-3 Optimize imagery  🟡 _(photos self-hosted/resized/EXIF-stripped in #7; WebP/srcset remain)_
 - [ ] PERF-4 Image width/height (CLS)
 - [ ] PERF-6 Trim/speed fonts
 - [ ] PERF-7 Tame animation/blur
 
-**Phase 5 — Testing & Quality Gates**
-- [ ] TEST-1 Hermetic backend tests
+**Phase 5 — Testing & Quality Gates** — ⬜ todo (🟢 best Emergent-safe lane next)
+- [ ] TEST-1 Hermetic backend tests  _(also closes the 2 open PR #2 threads)_
 - [ ] DX-5 Remove duplicate test script
 - [ ] DX-6 Frontend tests + coverage
 - [ ] DX-7 Backend lint/type config
@@ -656,7 +698,7 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
 - [ ] DX-9 Pre-commit
 - [ ] DX-10 docker-compose / Makefile
 
-**Phase 6 — Content & Hygiene Polish**
+**Phase 6 — Content & Hygiene Polish** — ⬜ todo (⚙️ content via Emergent · `DX-11` 🔒)
 - [ ] SEO-9 Location/phone consistency
 - [ ] SEO-10 Verify outbound claims
 - [ ] SEO-11 Real case-study screenshots
@@ -671,11 +713,11 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
 
 Keep PRs small and reviewable. A natural sequence:
 
-1. **`security/critical-hardening`** — SEC-1–5 (+SEC-11 note). *Ship first.*
-2. **`chore/de-emergent`** — SEO-4/5/7/8 + `PERF-6a` (badge/scripts/Inter-font/favicon/theme-color).
-3. **`chore/dep-purge`** — FE-1 + SEC-10 (frontend `ui/` delete + backend requirements).
-4. **`feat/seo-foundation`** — SEO-1/2/3/6 (prerender + helmet + OG + robots/sitemap/JSON-LD).
-5. **`chore/devex-foundation`** — DX-1/2/3/4 (CI, READMEs, env examples).
+1. **`security/critical-hardening`** — SEC-1–5. ✅ **shipped, live on `main`** (`SEC-11` still open).
+2. **`chore/de-emergent`** — SEO-4/5/7/8 + `PERF-6a`. ✅ **merged to `develop` (#7)** — awaiting promotion.
+3. **`chore/dep-purge`** — FE-1 + SEC-10 (frontend `ui/` delete + backend requirements). 🔒 gated (fights Emergent).
+4. **`feat/seo-foundation`** — SEO-1/2/3/6 (prerender + helmet + OG + robots/sitemap/JSON-LD). ⚙️/🔒 mostly.
+5. **`chore/devex-foundation`** — DX-1/2/3/4. ✅ **merged to `develop` (#6)** (branch protection deferred — Emergent).
 6. **`a11y/baseline`** — A11Y-1–15 (can split motion+focus+contrast from the rest).
 7. **`refactor/frontend-architecture`** — FE-2–12.
 8. **`refactor/backend-modernization`** — SEC-6–9.
