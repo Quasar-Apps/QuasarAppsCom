@@ -230,8 +230,9 @@ debt and can interleave. Most items are isolated enough to ship as small PRs
 
 #### SEO-6 · Add robots.txt, sitemap.xml, manifest.json, JSON-LD `P1` `M`
 - **Files:** `frontend/public/`
-- **Problem:** `frontend/public/` contains only `index.html`. No crawl directives, no
-  sitemap, no PWA manifest, no structured data.
+- **Problem:** `frontend/public/` has `index.html` plus the self-hosted assets added in
+  #7 (`favicon.ico`, `logo.png`, `team/`), but **no** crawl directives, sitemap, PWA
+  manifest, or structured data — no `robots.txt`, `sitemap.xml`, `manifest.json`, or JSON-LD.
 - **Steps:** add `robots.txt` (allow + `Sitemap:` line); generate `sitemap.xml`
   for `/` and each case-study slug; add `manifest.json` + `<link rel="manifest">`;
   inject a JSON-LD `Organization` block (name, url, logo, `sameAs` GitHub/LinkedIn, contactPoint).
